@@ -20,7 +20,7 @@ Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00-
 좋은 기본값(디자인 토큰·UX 동작·스택 설정·모듈)을 **미리 박아둬, 일정 수준까지는 결정 없이 작동**하게 한다.
 - **문제 고유한 것만 정한다.** 나머지는 기본값을 상속 → **필요할 때만 override.**
 - 색·간격·타이포·로딩·에러·복사/다운로드·confidence는 *물어보지 않고* 기본 적용.
-- 구현 위치: `design/`(토큰·테마) · `stack/streamlit_template.py`(동작 기본값) · `lessons/defaults.md`(원칙)
+- 구현 위치: `design/`(토큰·테마) · `stack/templates/recommend_app.py`(동작 기본값) · `lessons/defaults.md`(원칙)
 
 ## 빌드 파이프라인 (척추)
 Input → Context Extraction → Candidate Discovery → Recommendation → Explanation → Action Planning → Artifact Generation
@@ -32,7 +32,7 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 
 ## 기본 스택 (세팅 최소)
 - **Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출.** 무거운 프레임워크(LangGraph 등) 금지.
-- **출발점: `stack/streamlit_template.py`** (clone 즉시 실행되는 보일러플레이트) — 이 위에 빌드.
+- **출발점: `stack/templates/recommend_app.py`** (clone 즉시 실행되는 보일러플레이트) — 이 위에 빌드.
 
 ## 출력 계약
 - 모든 화면은 **10초 안에 가치**를 보여준다. 로딩 중엔 "이해한 상황 / 발견한 후보"를 표시(빈 스피너 ❌).
@@ -52,7 +52,7 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - **새 앱 시작 → `playbook/01-planning-interview.md`(함께 기획) → `playbook/02-project-template.md`(채움)**
 - **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/ux·data-input·defaults·dashboard·ai-chat·mvp)
 - **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`**
-- **스택·빌드 → `stack/streamlit_template.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
+- **스택·빌드 → `stack/templates/recommend_app.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
 - **엔지니어링 → `method/`**(context-engineering·tool-design·long-running-harness·agents-vs-workflows·spec-first)
 - **프롬프트 → `prompts/`** · **Claude Code 실전 → `claude-craft/`** · **근거 → `research/`**
 

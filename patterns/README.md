@@ -4,7 +4,7 @@
 
 | 유형 | 정의 문서 | 보일러플레이트 |
 |---|---|---|
-| **A 추천/매칭** | `recommendation.md` | `../stack/streamlit_template.py` |
+| **A 추천/매칭** | `recommendation.md` | `../stack/templates/recommend_app.py` |
 | **B 의사결정/위험** | `decision.md` | `../stack/templates/decision_app.py` |
 | **C 체크리스트/준비** | `checklist.md` | `../stack/templates/checklist_app.py` |
 | **D 문서 생성** | `document.md` | `../stack/templates/document_app.py` |

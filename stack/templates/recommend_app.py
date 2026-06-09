@@ -1,7 +1,7 @@
 """
 서비스 개발 플레이북 — Streamlit 단일파일 보일러플레이트 (clone-and-go)
 
-실행:  pip install -r requirements.txt  &&  streamlit run stack/streamlit_template.py
+실행:  pip install -r requirements.txt  &&  streamlit run stack/templates/recommend_app.py
 - API 키 없어도 mock으로 즉시 동작 → 키(ANTHROPIC_API_KEY) 넣으면 실제 LLM.
 - 이 파일은 lessons/ 원칙을 코드로 구현한 '중간 출발점'. 문제만 바꿔 끼우면 된다.
 """

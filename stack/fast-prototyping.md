@@ -1,11 +1,11 @@
 # stack — 빠른 프로토타이핑 (Streamlit 단일파일)
 
-> 근거: Streamlit 공식 docs(1차) — 3차 리서치 검증. 출발점 코드: `stack/streamlit_template.py`.
+> 근거: Streamlit 공식 docs(1차) — 3차 리서치 검증. 출발점 코드: `stack/templates/recommend_app.py`.
 
 ## 1. 단일파일 패턴 (<50줄로 챗 앱)
 - **왜:** 세팅 최소 → 4시간에 최적. 무거운 프레임워크(LangGraph 등) 불필요.
 - **구조:** `session_state` 히스토리 초기화 → 표시 루프 → `st.chat_input` → LLM 호출(stream) → `st.write_stream`.
-- **4시간:** `streamlit_template.py`를 복제해 입력·데이터·프롬프트만 교체.
+- **4시간:** `recommend_app.py`를 복제해 입력·데이터·프롬프트만 교체.
 
 ## 2. 상태 = `st.session_state`
 - **왜:** Streamlit은 상호작용마다 **위→아래 전체 재실행**(rerun). 그냥 변수는 매번 초기화됨.
