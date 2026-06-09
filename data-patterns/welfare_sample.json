@@ -1,0 +1,29 @@
+[
+  {
+    "name": "기초연금",
+    "target": "만 65세 이상, 소득 하위 70%",
+    "benefit": "월 최대 약 33만원",
+    "how_to_apply": "복지로(온라인) 또는 주민센터",
+    "documents": "신분증, 본인 명의 통장",
+    "source_url": "https://www.bokjiro.go.kr",
+    "confidence": "확인 필요"
+  },
+  {
+    "name": "근로장려금",
+    "target": "저소득 근로·사업·종교인 가구",
+    "benefit": "연 최대 약 330만원",
+    "how_to_apply": "홈택스/손택스 신청(자동신청 동의 가능)",
+    "documents": "소득·재산 자료(국세청 보유분 활용)",
+    "source_url": "https://www.hometax.go.kr",
+    "confidence": "확인 필요"
+  },
+  {
+    "name": "에너지바우처",
+    "target": "생계·의료급여 등 + 더위·추위 민감군",
+    "benefit": "연료비 바우처",
+    "how_to_apply": "주민센터 또는 복지로",
+    "documents": "신분증, 수급 증빙",
+    "source_url": "https://www.bokjiro.go.kr",
+    "confidence": "확인 필요"
+  }
+]

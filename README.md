@@ -33,9 +33,14 @@ streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실
 | `playbook/10_project_template.md` | 기획서 초안 → 개발 지시서 템플릿 | ✅ |
 | `lessons/` | 설계 교훈(UX·입력·기본값·대시보드·AI·MVP, NN/g 근거) | ✅ |
 | `claude-craft/` | Claude Code 실전(클로드MD·검증·서브에이전트·워크플로) | ✅ |
+| `method/` | 엔지니어링(컨텍스트·도구·하네스·워크플로vs에이전트·스펙) | ✅ |
+| `prompts/` | 프롬프트 패턴(고도·XML·few-shot·슬래시) | ✅ |
+| `design/` | 디자인 토큰(기본값) · AI 슬롭 회피 | ✅ |
+| `stack/` | 보일러플레이트 + 빠른 프로토타이핑(Streamlit) | ✅ |
+| `data-patterns/` | 고정 데이터 스키마·샘플 | ✅ |
 | `patterns/` | 조합 가능한 기능 모듈(추천/의사결정/체크리스트/문서) | ⏳ 추천만 |
-| `research/` | 딥리서치 근거(claude-app, ux-design) | ✅ |
-| `method/` `prompts/` `design/` `stack/` `data-patterns/` | 심화·스택·데이터 | ⏳ |
+| `research/` | 딥리서치 근거(claude-app · ux-design · playbook-gaps) | ✅ |
+| `.streamlit/config.toml` | 기본 테마(Defaults-first) | ✅ |
 
 ## 흐름 (사람 ↔ AI)
 ```

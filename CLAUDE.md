@@ -16,6 +16,12 @@ Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00_
 4. 모든 추천은 **결과물을 생성한다**. (체크리스트·PDF·행동계획·민원초안 중 1개 이상)
 5. 새 정보를 만들지 말고 기존 정보를 **압축·우선순위화·행동화**한다.
 
+## 기본값 우선 (Defaults-first) ★
+좋은 기본값(디자인 토큰·UX 동작·스택 설정·모듈)을 **미리 박아둬, 일정 수준까지는 결정 없이 작동**하게 한다.
+- **문제 고유한 것만 정한다.** 나머지는 기본값을 상속 → **필요할 때만 override.**
+- 색·간격·타이포·로딩·에러·복사/다운로드·confidence는 *물어보지 않고* 기본 적용.
+- 구현 위치: `design/`(토큰·테마) · `stack/streamlit_template.py`(동작 기본값) · `lessons/Defaults.md`(원칙)
+
 ## 빌드 파이프라인 (척추)
 Input → Context Extraction → Candidate Discovery → Recommendation → Explanation → Action Planning → Artifact Generation
 
@@ -43,10 +49,12 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - AI는 자격 **'판정'을 하지 않는다**(확인 필요로 표시). 단순 조회·계산은 코드로.
 
 ## 라우팅 (필요할 때만 읽기)
-- **새 앱/기획 시작 → `playbook/10_project_template.md`를 먼저 채운다** (기획 → 개발 지시서)
-- **UI/UX 만들 때 → `lessons/README.md` 체크리스트를 항상 적용** (+ `lessons/UX·DataInput·Defaults·Dashboard·AIChat·MVP`)
-- CLAUDE.md 작성법 → `claude-craft/claude-md.md` · 검증 → `claude-craft/verification-loop.md`
-- 프롬프트 패턴 → `prompts/` · 방법론(도구·하네스) → `method/` · 근거 → `research/`
+- **새 앱 시작 → `playbook/01_planning_interview.md`(함께 기획) → `playbook/10_project_template.md`(채움)**
+- **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/UX·DataInput·Defaults·Dashboard·AIChat·MVP)
+- **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`**
+- **스택·빌드 → `stack/streamlit_template.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
+- **엔지니어링 → `method/`**(context-engineering·tool-design·long-running-harness·agents-vs-workflows·spec-first)
+- **프롬프트 → `prompts/`** · **Claude Code 실전 → `claude-craft/`** · **근거 → `research/`**
 
 ## 금지
 - 200줄 넘는 CLAUDE.md · 사전 완성된 정답 코드 · 실시간 API 가정 · 행동 없는 정보 나열
