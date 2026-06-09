@@ -4,12 +4,15 @@
 
 ## 스키마 (예: welfare_sample.json)
 ```
-name · target · benefit · how_to_apply · documents · source_url · confidence
+name · target · benefit · how_to_apply · documents[] · source_url · confidence
 ```
 - `confidence`: 확정 / 높음 / 중간 / 확인 필요 (보정된 값일 때만 신뢰 — `lessons/ai-chat`)
+- `documents`는 **배열**, 묶음/중복 제거를 코드로 하려면 **표준 서류명**으로(자유 서술 ❌). → `how-to-collect.md` §5
+- `tags` 등 분류는 **포함관계를 데이터에 반영**(예: 영아 항목도 `["영아","영유아"]`). → `how-to-collect.md` §5
 
 ## 쓰는 법
 - 모듈(`patterns/`)이 이 데이터에서 **자격 후보를 코드로 필터** → LLM은 우선순위·설명·결과물 생성.
 - 새 도메인은 같은 스키마로 파일 추가(예: `disaster_sample.json`).
+- 묶음·필터를 코드로 돌리려면 **값이 먼저 깨끗해야** 한다(표준화·계층). 실제로 깨진 사례 → `how-to-collect.md` §5 도그푸딩 교훈.
 
 > ⚠️ 샘플 수치는 예시 — 실제 사용 전 공식 출처로 확인.
