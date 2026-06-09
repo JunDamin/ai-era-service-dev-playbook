@@ -25,7 +25,7 @@
  3) 하네스 깔기 → requirements.md(전부 failing) + non-goals + 보일러플레이트
  4) 병렬 빌드   → 서브에이전트/2인 분업 + lessons 기본값 적용
  5) 검증        → 성공 기준(pass/fail) 통과까지 end-to-end 반복
- 6) 마무리      → 작동 데모 + 발표
+ 6) 데모/발표   → 03-demo (검증 시나리오를 'S-tier 피치'로) — 빌드만큼 점수다
 ```
 
 ## 4기둥 (자세히)
@@ -49,4 +49,4 @@
 - → `lessons/README.md`, `claude-craft/verification-loop.md`
 
 ## 4시간 타임박스 (해커톤)
-0–30 기획 인터뷰+템플릿 / 30–60 하네스(요구사항·non-goals·보일러플레이트) / 60–180 병렬 빌드(검증 ON) / 180–210 polish / 210–240 발표. → `claude-craft/workflow.md`
+0–30 기획 인터뷰+템플릿 / 30–60 하네스(요구사항·non-goals·보일러플레이트) / 60–180 병렬 빌드(검증 ON) / 180–210 polish + **데모 리허설(`03-demo`)** / 210–240 발표. → `claude-craft/workflow.md`
