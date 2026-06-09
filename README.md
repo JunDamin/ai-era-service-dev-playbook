@@ -39,7 +39,7 @@ streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실
 | `stack/` | 보일러플레이트 + **유형별 템플릿(A·B·C·D)** + 빠른 프로토타이핑 | ✅ |
 | `data-patterns/` | 고정 데이터 스키마·샘플 | ✅ |
 | `patterns/` | 기능 모듈 **A 추천·B 의사결정·C 체크리스트·D 문서** | ✅ |
-| `research/` | 딥리서치 근거(claude-app · ux-design · playbook-gaps) | ✅ |
+| `research/` | 딥리서치 근거(claude-app · ux-design · playbook-gaps · design-and-agents) | ✅ |
 | `.streamlit/config.toml` | 기본 테마(Defaults-first) | ✅ |
 
 ## 흐름 (사람 ↔ AI)
