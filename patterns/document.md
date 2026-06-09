@@ -31,4 +31,4 @@
 - 문서 템플릿(고정) → `data-patterns/` 또는 인라인 템플릿
 
 ## 근거 / 출처
-- 행동>정보(결과물 생성) = CLAUDE.md Rule 1·4 · 편집 가능·복사/다운로드 = `lessons/Dashboard.md`
+- 행동>정보(결과물 생성) = CLAUDE.md Rule 1·4 · 편집 가능·복사/다운로드 = `lessons/dashboard.md`

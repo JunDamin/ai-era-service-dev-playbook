@@ -30,4 +30,4 @@
 - `data-patterns/` 단계·항목 고정 데이터
 
 ## 근거 / 출처
-- 한 화면 한 과제·스캔성 = `lessons/UX.md` · 결과물 다운로드 = `lessons/Dashboard.md`
+- 한 화면 한 과제·스캔성 = `lessons/ux.md` · 결과물 다운로드 = `lessons/dashboard.md`

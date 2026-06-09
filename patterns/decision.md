@@ -33,4 +33,4 @@
 - `data-patterns/` 위험/행동요령 고정 데이터(예: 재난 행동요령)
 
 ## 근거 / 출처
-- 행동>정보·결과물 = CLAUDE.md Rule 1·4 · 시그널/위계 = `lessons/Dashboard.md`
+- 행동>정보·결과물 = CLAUDE.md Rule 1·4 · 시그널/위계 = `lessons/dashboard.md`

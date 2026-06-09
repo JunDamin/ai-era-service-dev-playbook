@@ -6,7 +6,7 @@
 ```
 name · target · benefit · how_to_apply · documents · source_url · confidence
 ```
-- `confidence`: 확정 / 높음 / 중간 / 확인 필요 (보정된 값일 때만 신뢰 — `lessons/AIChat`)
+- `confidence`: 확정 / 높음 / 중간 / 확인 필요 (보정된 값일 때만 신뢰 — `lessons/ai-chat`)
 
 ## 쓰는 법
 - 모듈(`patterns/`)이 이 데이터에서 **자격 후보를 코드로 필터** → LLM은 우선순위·설명·결과물 생성.

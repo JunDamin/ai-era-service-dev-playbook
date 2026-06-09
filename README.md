@@ -14,7 +14,7 @@ pip install -r requirements.txt
 streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실행(키 없어도 mock)
 ```
 그다음 **Claude Code로 이 폴더를 열면** `CLAUDE.md`가 자동 로드 → AI가 플레이북을 이미 안다.
-새 작업은 한마디로 시작: **"새 앱 기획 시작"** → AI가 `playbook/01_planning_interview.md`로 질문을 던지며 함께 기획 → `stack/` 보일러플레이트 위에 빌드.
+새 작업은 한마디로 시작: **"새 앱 기획 시작"** → AI가 `playbook/01-planning-interview.md`로 질문을 던지며 함께 기획 → `stack/` 보일러플레이트 위에 빌드.
 
 > 즉 clone 한 순간 *설정·보일러플레이트·원칙·검증 기준*이 이미 깔려 있어, **문제만 끼우면 된다.**
 
@@ -28,9 +28,9 @@ streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실
 | 폴더/파일 | 역할 | 상태 |
 |---|---|---|
 | `CLAUDE.md` | 운영 지침(사람·AI 공통 뇌) | ✅ |
-| `playbook/00_overview.md` | 전체 사용법·흐름·역할 | ✅ |
-| `playbook/01_planning_interview.md` | 함께 기획(질문 인터뷰) | ✅ |
-| `playbook/10_project_template.md` | 기획서 초안 → 개발 지시서 템플릿 | ✅ |
+| `playbook/00-overview.md` | 전체 사용법·흐름·역할 | ✅ |
+| `playbook/01-planning-interview.md` | 함께 기획(질문 인터뷰) | ✅ |
+| `playbook/02-project-template.md` | 기획서 초안 → 개발 지시서 템플릿 | ✅ |
 | `lessons/` | 설계 교훈(UX·입력·기본값·대시보드·AI·MVP, NN/g 근거) | ✅ |
 | `claude-craft/` | Claude Code 실전(클로드MD·검증·서브에이전트·워크플로) | ✅ |
 | `method/` | 엔지니어링(컨텍스트·도구·하네스·워크플로vs에이전트·스펙) | ✅ |
@@ -46,10 +46,10 @@ streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실
 ```
 아이디어
  → [01] 기획 인터뷰 (AI가 질문, 사람이 답 → 함께 좁힘)
- → [10] 템플릿 채움 (기획서 초안)
+ → [02] 템플릿 채움 (기획서 초안)
  → 하네스/보일러플레이트 + non-goals (문제 억제)
  → 병렬 빌드 (서브에이전트/2인) + 검증 루프
  → 작동하는 서비스
 ```
 
-> 시작점: **`playbook/00_overview.md`** 읽기 → 새 작업은 `playbook/01_planning_interview.md`로.
+> 시작점: **`playbook/00-overview.md`** 읽기 → 새 작업은 `playbook/01-planning-interview.md`로.

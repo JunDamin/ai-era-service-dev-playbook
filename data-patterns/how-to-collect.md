@@ -22,7 +22,7 @@
 스키마: { name, target, benefit, how_to_apply, documents, source_url, confidence }
 ```
 - 웹 검색 가능한 도구면 위 인스트럭션 + "공식 출처 우선" → 결과를 `*_sample.json`으로 저장.
-- 검증: 표본 몇 건의 `source_url`을 실제로 열어 사실 확인(출처≠검증 — `lessons/AIChat`).
+- 검증: 표본 몇 건의 `source_url`을 실제로 열어 사실 확인(출처≠검증 — `lessons/ai-chat`).
 
 ## 3. 큐레이션 절차 (4시간용)
 1. **좁게** — 한 시나리오/1 페르소나로 한정(전부 모으려 하지 말 것).

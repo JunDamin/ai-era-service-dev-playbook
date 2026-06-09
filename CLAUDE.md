@@ -1,10 +1,10 @@
 # 인공지능 시대의 서비스 개발 플레이북 — 운영 지침
 
 **사람과 AI가 같이 보는 플레이북.** 아이디어를 *검토 가능한 기획*으로 만들고, AI 코딩의 시행착오를 줄여 **짧은 시간에** 작동하는 서비스를 만든다.
-Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00_overview.md`)
+Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00-overview.md`)
 
 ## 4기둥
-- **함께 기획(상호작용):** 바로 코딩하지 말고, 사용자와 **기획 인터뷰**로 문제·범위를 먼저 좁힌다(질문 하나씩, 추천답 제시). → `playbook/01_planning_interview.md`
+- **함께 기획(상호작용):** 바로 코딩하지 말고, 사용자와 **기획 인터뷰**로 문제·범위를 먼저 좁힌다(질문 하나씩, 추천답 제시). → `playbook/01-planning-interview.md`
 - **하네스 먼저(문제 억제):** 요구사항 파일·non-goals·보일러플레이트를 먼저 깔아 *문제가 커지지 않게* 한다. → `claude-craft/`
 - **병렬로 빠르게:** 독립 작업은 서브에이전트/2인 분업으로 동시에. → `claude-craft/subagents.md`
 - **실패하지 않을 환경:** "코딩해줘" 전에 검증 기준·UX 기본값을 먼저 설계. → `lessons/`, `claude-craft/verification-loop.md`
@@ -20,14 +20,14 @@ Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00_
 좋은 기본값(디자인 토큰·UX 동작·스택 설정·모듈)을 **미리 박아둬, 일정 수준까지는 결정 없이 작동**하게 한다.
 - **문제 고유한 것만 정한다.** 나머지는 기본값을 상속 → **필요할 때만 override.**
 - 색·간격·타이포·로딩·에러·복사/다운로드·confidence는 *물어보지 않고* 기본 적용.
-- 구현 위치: `design/`(토큰·테마) · `stack/streamlit_template.py`(동작 기본값) · `lessons/Defaults.md`(원칙)
+- 구현 위치: `design/`(토큰·테마) · `stack/streamlit_template.py`(동작 기본값) · `lessons/defaults.md`(원칙)
 
 ## 빌드 파이프라인 (척추)
 Input → Context Extraction → Candidate Discovery → Recommendation → Explanation → Action Planning → Artifact Generation
 
 ## 문제 → 모듈 조합
 문제를 받으면: (a) 파이프라인에 매핑 → (b) 아래 모듈을 1~N개 골라 조합 → (c) **좁은 1개 시나리오부터 완주**.
-- 추천형(A) · 의사결정형(B) · 체크리스트형(C) · 문서생성형(D) → `patterns/<module>.md` 참조
+- 추천형(A) · 의사결정형(B) · 체크리스트형(C) · 문서생성형(D) → `patterns/`(README + 각 모듈) 참조
 - 대부분의 문제 = 2개 조합 (예: 혜택 추천 A + 신청가이드 D)
 
 ## 기본 스택 (세팅 최소)
@@ -49,8 +49,8 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - AI는 자격 **'판정'을 하지 않는다**(확인 필요로 표시). 단순 조회·계산은 코드로.
 
 ## 라우팅 (필요할 때만 읽기)
-- **새 앱 시작 → `playbook/01_planning_interview.md`(함께 기획) → `playbook/10_project_template.md`(채움)**
-- **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/UX·DataInput·Defaults·Dashboard·AIChat·MVP)
+- **새 앱 시작 → `playbook/01-planning-interview.md`(함께 기획) → `playbook/02-project-template.md`(채움)**
+- **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/ux·data-input·defaults·dashboard·ai-chat·mvp)
 - **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`**
 - **스택·빌드 → `stack/streamlit_template.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
 - **엔지니어링 → `method/`**(context-engineering·tool-design·long-running-harness·agents-vs-workflows·spec-first)

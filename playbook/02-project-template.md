@@ -22,16 +22,16 @@
 > 
 
 ## 5. Core Value (가장 작은 가치 단위)
-- "이 앱은 **[대상]**이 **[과업]**을 **[결과물]**로 끝내게 한다." → `lessons/MVP.md`
+- "이 앱은 **[대상]**이 **[과업]**을 **[결과물]**로 끝내게 한다." → `lessons/mvp.md`
 > 
 
 ## 6. MVP Scope (범위)
 - **만들 것(최소):**
-- **절대 안 만들 것(non-goals):** (로그인·권한·다국어·결제 기본 제외) → `lessons/MVP.md`
+- **절대 안 만들 것(non-goals):** (로그인·권한·다국어·결제 기본 제외) → `lessons/mvp.md`
 > 
 
 ## 7. Input / Output (입력·출력)
-- **입력:** (선택>입력 — 드롭다운/칩/피커 우선) → `lessons/DataInput.md`
+- **입력:** (선택>입력 — 드롭다운/칩/피커 우선) → `lessons/data-input.md`
 - **출력(결과물):** Card/Checklist/Timeline/Report/PDF 중 무엇 → `patterns/`
 > 
 
@@ -43,7 +43,7 @@
 
 ## 9. Failure Cases (실패 시나리오)
 - 사용자가 어디서 막힐까? 잘못 입력하면? 데이터 없으면? AI가 틀리면?
-- 각각의 대비(빈/오류/로딩 상태) → `lessons/UX.md`, `lessons/AIChat.md`
+- 각각의 대비(빈/오류/로딩 상태) → `lessons/ux.md`, `lessons/ai-chat.md`
 > 
 
 ## 10. Validation Criteria (성공 기준 = pass/fail)

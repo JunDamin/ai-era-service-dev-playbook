@@ -10,15 +10,15 @@ import streamlit as st
 
 MODEL = "claude-sonnet-4-6"  # 앱은 보통 Sonnet으로 충분(복잡하면 opus)
 
-# 0) 페이지 — 일관 디자인 (lessons/UX)
+# 0) 페이지 — 일관 디자인 (lessons/ux)
 st.set_page_config(page_title="서비스 데모", page_icon="✅", layout="centered")
 
-# 1) 세션 상태 + 자동저장 (lessons/Defaults: autosave, 재입력 강요 금지)
+# 1) 세션 상태 + 자동저장 (lessons/defaults: autosave, 재입력 강요 금지)
 DEFAULTS = {"region": "서울", "targets": [], "result": None}
 for k, v in DEFAULTS.items():
     st.session_state.setdefault(k, v)
 
-# 2) 고정 샘플 데이터 (lessons/MVP: 실시간 API 의존 X → data-patterns/로 분리 가능)
+# 2) 고정 샘플 데이터 (lessons/mvp: 실시간 API 의존 X → data-patterns/로 분리 가능)
 SAMPLE = [
     {"name": "기초연금", "target": "65세 이상", "benefit": "월 최대 33만원",
      "how": "복지로/주민센터 신청", "docs": "신분증, 통장", "url": "https://www.bokjiro.go.kr"},
@@ -62,13 +62,13 @@ def recommend(profile: dict) -> list:
 st.title("✅ 맞춤 혜택 찾기 (데모)")
 st.caption("조건을 고르면 받을 수 있는 혜택과 신청 방법을 정리해 드립니다.")
 
-# 4) 입력 — 선택 > 입력, 영구 레이블 (lessons/DataInput)
+# 4) 입력 — 선택 > 입력, 영구 레이블 (lessons/data-input)
 regions = ["서울", "경기", "부산", "기타"]
 st.session_state.region = st.selectbox("지역", regions, index=regions.index(st.session_state.region))
 st.session_state.targets = st.multiselect(
     "대상 유형", ["65세 이상", "저소득 근로", "장애", "다문화"], default=st.session_state.targets)
 
-# 5) 실행 — 빈 스피너 대신 진행 표시 (lessons/AIChat)
+# 5) 실행 — 빈 스피너 대신 진행 표시 (lessons/ai-chat)
 if st.button("받을 수 있는 혜택 보기", type="primary"):
     with st.status("상황 분석 중…", expanded=True) as s:
         st.write("프로필 정리")
@@ -77,7 +77,7 @@ if st.button("받을 수 있는 혜택 보기", type="primary"):
         st.session_state.result = recommend(profile)
         s.update(label="완료", state="complete")
 
-# 6) 결과 — 카드 + confidence + 복사/다운로드 + 다음 행동 (lessons/Dashboard)
+# 6) 결과 — 카드 + confidence + 복사/다운로드 + 다음 행동 (lessons/dashboard)
 res = st.session_state.result
 if res:
     st.subheader("추천 결과")
@@ -93,5 +93,5 @@ if res:
     st.download_button("체크리스트 다운로드(.md)", f"# 신청 체크리스트\n{summary}\n", "checklist.md")
     st.info("다음 행동: 위 '공식 페이지'에서 신청 → 서류 준비 → 제출")
 else:
-    # 빈 화면 금지 (lessons/UX): 안내 제공
+    # 빈 화면 금지 (lessons/ux): 안내 제공
     st.info("👆 조건을 고르고 버튼을 누르면 결과가 나옵니다. (예: 지역=서울, 대상=65세 이상)")
