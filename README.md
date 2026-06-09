@@ -9,7 +9,7 @@
 
 ## Quickstart (clone-and-go) — 중간에서부터 시작
 ```bash
-git clone <this-repo> && cd service-dev-playbook
+git clone https://github.com/JunDamin/ai-era-service-dev-playbook && cd ai-era-service-dev-playbook
 pip install -r requirements.txt
 streamlit run stack/streamlit_template.py     # 보일러플레이트 즉시 실행(키 없어도 mock)
 ```
