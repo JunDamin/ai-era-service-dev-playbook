@@ -10,9 +10,11 @@
 | **B 의사결정/위험** | `decision_app.py` | 상황 → 위험도·우선순위·행동계획 |
 | **C 체크리스트/준비** | `checklist_app.py` | 상황 → 준비 항목·타임라인 체크리스트 |
 | **D 문서 생성** | `document_app.py` | 사실 → 민원/신청서/보고서 초안 |
+| **위저드 (대안 스택)** | `fasthtml_app.py` | **FastHTML 멀티페이지** — LLM+제품감+다단계 입력이 필요할 때(§0 표). 라우트=페이지·세션 누적·confirm·tokens.css. A~D 메커니즘을 이 골격에 얹어도 됨 |
 
 ```bash
-streamlit run stack/templates/decision_app.py     # 예: B
+streamlit run stack/templates/decision_app.py        # 예: B (기본 스택)
+pip install python-fasthtml && python stack/templates/fasthtml_app.py   # 위저드 (대안 스택)
 ```
 
 - 대부분의 서비스 = **2개 조합**(예: A 추천 + D 문서). 유형 정의·조합은 `../../patterns/`.
