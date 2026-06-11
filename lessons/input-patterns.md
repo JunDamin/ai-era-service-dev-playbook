@@ -39,6 +39,9 @@
 ### P4 · 위저드 / 대화형 (한 질문씩)
 - **언제:** 입력이 **길거나(5+)·순차적**이고, 사용자가 답을 즉시 모를 때. 한 화면 한 과제 → 완료율↑·오류↓.
 - **어떻게:** 단계당 한 질문/그룹, 진행·남은 단계 표시, 뒤로/수정 허용. 답은 **버튼/칩**으로(타이핑 최소).
+- **One Thing Per Page (토스·GOV.UK가 독립적으로 도달한 같은 결론):** 화면(단계)마다 **명확한 목표 1개 + CTA 1개**. 토스 Simplicity의 골자 = "1초 만에 이해되게": 친숙한 개념(Casual Concept) + 화면당 하나(One thing per One page) + 명확한 CTA. GOV.UK도 리서치 근거로 동일 처방.
+  - 같은 여정에서 **같은 정보를 두 번 묻지 말 것** — 이전 답을 프리필/선택지로 재활용(= Rule③).
+  - 단계가 끝나면 **제출 전 '입력 확인(check answers)' 화면**으로 신뢰·오류 모두 잡기 — 특히 D형(문서 생성) 직전에 유효.
 - **주의(중요):** *입력값이 정해져 있고 구조가 중요하면 정형 폼이 채팅보다 빠르고 명확*하다. 대화형은 **탐색·의사결정이 어려울 때** 빛난다. 순수 챗봇은 매 턴 지연·비용·헛질문 위험 → 기본값 아님.
 
 ### P5 · 결정트리 / 상황 트리 (분기·의존)
@@ -64,5 +67,6 @@
 - NN/g 체크박스vs라디오: https://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ · 리스트박스vs드롭다운: https://www.nngroup.com/articles/listbox-dropdown/ · 폼 오류 가이드: https://www.nngroup.com/articles/errors-forms-design-guidelines/ · 단계 제시 시점: https://www.nngroup.com/articles/workflow-expectations/
 - 패싯: https://www.uxmatters.com/mt/archives/2009/09/best-practices-for-designing-faceted-search-filters.php · https://www.algolia.com/blog/ux/faceted-search-an-overview
 - 위저드 vs 폼: https://www.uxmatters.com/mt/archives/2011/09/wizards-versus-forms.php · 폼 vs 대화형(언제 무엇): https://medium.com/design-bootcamp/agentic-ux-in-enterprise-when-to-use-conversational-agents-vs-traditional-forms-93cf588eac21
+- One Thing Per Page: 토스 toss.tech(Simplicity·제품 원칙) · GOV.UK question pages: https://design-system.service.gov.uk/patterns/question-pages/ — ※ 참조 우선순위: **토스 기준, 해외 가이드는 충돌 없는 조언만 병합**
 - 분기 로직(logic jump): https://help.typeform.com/hc/en-us/articles/360054770931-Use-branching-logic-to-show-relevant-questions
 - AI 자동채움(검토·수정): https://www.mvst.co/blog/post/ai-autofill-for-the-web-smarter-automation-for-filling-forms
