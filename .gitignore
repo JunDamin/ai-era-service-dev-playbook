@@ -6,4 +6,6 @@ venv/
 .streamlit/secrets.toml
 .DS_Store
 .omc/
-.claude/
+# .claude는 로컬 설정만 무시하고, 동봉 스킬은 커밋한다
+.claude/*
+!.claude/skills/

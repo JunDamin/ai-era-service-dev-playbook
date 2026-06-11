@@ -52,7 +52,7 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - **새 앱 시작 → `playbook/01-planning-interview.md`(함께 기획) → `playbook/02-project-template.md`(채움)**
 - **데모/발표 → `playbook/03-demo.md`** (검증 시나리오를 'S-tier 피치'로 — 빌드만큼 점수)
 - **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/ux·data-input·defaults·dashboard·ai-chat·mvp)
-- **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`**
+- **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`** · **UI 마감 → `design-polish` 스킬**(동봉, `.claude/skills/`) · 스킬 안내 → `claude-craft/skills-setup.md`
 - **스택·빌드 → `stack/templates/recommend_app.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
 - **엔지니어링 → `method/`**(context-engineering·tool-design·long-running-harness·agents-vs-workflows·spec-first)
 - **프롬프트 → `prompts/`** · **Claude Code 실전 → `claude-craft/`** · **근거 → `research/`**
