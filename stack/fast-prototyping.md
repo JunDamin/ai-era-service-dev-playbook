@@ -29,6 +29,9 @@
 - rerun을 잊고 일반 변수 사용 → 상태 사라짐(→ session_state)
 - 무거운 객체를 매번 생성 → 느림(→ cache_resource)
 - 키 하드코딩/커밋(→ secrets)
+- **위젯 key는 생성 후 수정 금지** — 버튼 콜백에서 `st.session_state.addr = …`처럼 *이미 그려진* 위젯의 key를 바꾸면 `StreamlitAPIException`. **처방:** 임시 키(`_pending_addr`)에 담고 `st.rerun()` → 다음 런에서 **위젯을 그리기 전에** 주입.
+- **포트 충돌로 '엉뚱한 앱'이 뜸** — `0.0.0.0:8501`과 `127.0.0.1:8501`에 서로 다른 앱이 동시에 물릴 수 있어, localhost로 열면 이전 앱이 보인다(데모 사고 1순위). **처방:** 앱마다 포트 고정(`.streamlit/config.toml`의 `server.port`) + 띄운 뒤 **페이지 타이틀로 내 앱인지 확인**, 의심되면 새 포트.
+- **로직과 UI를 한 덩어리로** — 모듈 레벨 함수 + `main()`/`__main__` 가드로 분리해야 UI 없이 로직 테스트 가능(→ `claude-craft/verification-loop.md` 2단계 검증).
 
 ## 출처
 - https://docs.streamlit.io/develop/tutorials/chat-and-llm-apps/build-conversational-apps
