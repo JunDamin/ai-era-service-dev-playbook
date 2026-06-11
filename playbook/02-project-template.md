@@ -21,8 +21,13 @@
 - 현재 흐름에서 **어디서 막히고 포기하나?** (가장 아픈 1개)
 > 
 
-## 5. Core Value (가장 작은 가치 단위)
+## 5. Core Value (가장 작은 가치 단위) + 서비스 철학
 - "이 앱은 **[대상]**이 **[과업]**을 **[결과물]**로 끝내게 한다." → `lessons/mvp.md`
+> 
+- **서비스 철학 (UX의 헌법 — 화면·문구·입력이 전부 여기서 나온다):**
+  - 도착 상태: 사용자는 **[어떤 감정·상황]**으로 온다.
+  - 첫 10초: **[무엇 하나]**만 이해시킨다. (한 화면 한 목표 → `lessons/input-patterns.md` P4)
+  - 단순함의 대가: 그러기 위해 **[무엇]**을 숨기거나 대신해 준다.
 > 
 
 ## 6. MVP Scope (범위)
@@ -55,7 +60,8 @@
 ## 11. AI Coding Instructions (개발 지시서)
 > Claude에게 줄 빌드 규칙. 위 1~10을 근거로 아래를 **강제**한다.
 
-- **스택:** Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출(무거운 프레임워크 금지) → `stack/`
+- **스택:** 기본값 = Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출 → `stack/`
+  - 기본값에서 벗어나면 **이유 한 문장**: > _(예: "지도 드래그 상호작용이 핵심이라 정적 HTML+JS")_ → 선택 기준 `stack/fast-prototyping.md` §0
 - **요구사항 파일 먼저:** 기능 목록을 `requirements.md`로 작성(전부 'failing') → 기준점 → `claude-craft/workflow.md`
 - **반드시 포함:**
   - 샘플/고정 데이터 포함(실시간 API 의존 X) → `data-patterns/`

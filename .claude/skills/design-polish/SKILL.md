@@ -7,6 +7,7 @@ description: Streamlit 앱의 UI/디자인을 만들거나 다듬을 때 사용.
 
 > 목적: **결정 없이** 이 리포의 디자인 기본값을 일괄 적용해, 4시간 안에 'AI 슬롭'이 아닌 화면을 만든다.
 > 원천 문서(충돌 시 그쪽이 진실): `design/design-tokens.md` · `design/design-system.md` · `lessons/ux.md` §7-8
+> 비-Streamlit 스택이면: §1(테마)만 해당 스택의 방식으로 대체하고 §2~5는 그대로 적용(토큰·라이팅은 프레임워크 무관).
 
 ## 순서 (위에서 아래로 한 번)
 

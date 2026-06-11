@@ -30,9 +30,10 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - 추천형(A) · 의사결정형(B) · 체크리스트형(C) · 문서생성형(D) → `patterns/`(README + 각 모듈) 참조
 - 대부분의 문제 = 2개 조합 (예: 혜택 추천 A + 신청가이드 D)
 
-## 기본 스택 (세팅 최소)
-- **Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출.** 무거운 프레임워크(LangGraph 등) 금지.
-- **출발점: `stack/templates/recommend_app.py`** (clone 즉시 실행되는 보일러플레이트) — 이 위에 빌드.
+## 기본 스택 (세팅 최소) — 단, 스택은 아이디어 크기에 비례
+- **기본값: Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출** — 단일 시나리오·수 시간 데모엔 이게 최속. **출발점: `stack/templates/`**.
+- **기본값에서 벗어나도 된다** — 아이디어가 요구하면(다화면 제품·복잡한 상호작용·정적 배포 등) 맞는 최소 스택을 쓰되, **벗어나는 이유를 §11에 한 문장으로** 적는다(Defaults-first의 override 규칙). → 선택 기준: `stack/fast-prototyping.md` §0
+- 어떤 스택이든 변하지 않는 것: 단일 진입점·세션 상태 저장(Rule③)·키 없이 동작(mock)·무거운 오케스트레이션 프레임워크는 기본값 아님.
 
 ## 출력 계약
 - 모든 화면은 **10초 안에 가치**를 보여준다. 로딩 중엔 "이해한 상황 / 발견한 후보"를 표시(빈 스피너 ❌).
@@ -54,7 +55,7 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/ux·data-input·defaults·dashboard·ai-chat·mvp)
 - **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`** · **UI 마감 → `design-polish` 스킬**(동봉, `.claude/skills/`) · 스킬 안내 → `claude-craft/skills-setup.md`
 - **스택·빌드 → `stack/templates/recommend_app.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
-- **엔지니어링 → `method/`**(context-engineering·tool-design·long-running-harness·agents-vs-workflows·spec-first)
+- **엔지니어링 → `method/README.md`**(컨텍스트·스펙·하네스·에이전트vs워크플로·도구ACI — 한 파일)
 - **프롬프트 → `prompts/`** · **Claude Code 실전 → `claude-craft/`** · **근거 → `research/`**
 
 ## 금지
