@@ -6,8 +6,8 @@ description: Streamlit 앱의 UI/디자인을 만들거나 다듬을 때 사용.
 # design-polish — 플레이북 디자인 마감 스킬
 
 > 목적: **결정 없이** 이 리포의 디자인 기본값을 일괄 적용해, 4시간 안에 'AI 슬롭'이 아닌 화면을 만든다.
-> 원천 문서(충돌 시 그쪽이 진실): `design/design-tokens.md` · `design/design-system.md` · `lessons/ux.md` §7-8
-> 비-Streamlit 스택이면: §1(테마)만 해당 스택의 방식으로 대체하고 §2~5는 그대로 적용(토큰·라이팅은 프레임워크 무관).
+> 원천 문서(충돌 시 그쪽이 진실): `design/design-tokens.md`(+ **`design/tokens.css`** 구현체) · `design/design-system.md` · `lessons/ux.md` §7-8
+> **비-Streamlit 스택이면 §1 대신: `design/tokens.css`를 주입**(정적 HTML=`<link>`, FastHTML=`Style()`/hdrs) — `.pb-` 클래스(히어로·카드·단계배지·✓/!리스트)를 그대로 쓰면 토큰 점검(§2)이 자동 충족. ⚠️ 커스텀 클래스를 더 만들 땐 반드시 프리픽스(UI 프레임워크의 `.hero` 등과 충돌 — 실증된 함정).
 
 ## 순서 (위에서 아래로 한 번)
 

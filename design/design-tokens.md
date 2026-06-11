@@ -1,6 +1,7 @@
 # design/design-tokens — 기본 디자인 토큰 (Defaults-first)
 
 > **물어보지 말고 이 기본값을 적용한다.** 바꾸고 싶을 때만 override. (테마: `../.streamlit/config.toml`)
+> **실행 가능한 구현체: [`tokens.css`](tokens.css)** — 스택 무관(정적 HTML=`<link>`, FastHTML=`Style()` 주입). 같은 토큰을 어느 스택에 꽂아도 일관된 룩이 나온다(스택 비교 드라이런으로 검증). 클래스는 `.pb-` 프리픽스(UI 프레임워크 충돌 방지).
 
 ## 왜 토큰인가 (단일 진실원천)
 색·타이포·간격을 **토큰(이름=값)으로 한 곳에서** 정의 → 중앙에서 바꾸면 전체 반영(일관성↑). W3C DTCG가 JSON 포맷($value/$type)을 표준화. shadcn/ui는 **시맨틱 CSS 변수**로 구현.
