@@ -43,5 +43,5 @@
 
 ## 근거 / 출처
 - 행동>정보·추천→결과물 = CLAUDE.md Rule 1·4
-- 구조화 출력/few-shot → `prompts/xml-structure.md`, `prompts/few-shot.md`
+- 구조화 출력/few-shot → `prompts/README.md` §1·§2
 - https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags
