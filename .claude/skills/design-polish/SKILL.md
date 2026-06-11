@@ -7,11 +7,11 @@ description: Streamlit 앱의 UI/디자인을 만들거나 다듬을 때 사용.
 
 > 목적: **결정 없이** 이 리포의 디자인 기본값을 일괄 적용해, 4시간 안에 'AI 슬롭'이 아닌 화면을 만든다.
 > 원천 문서(충돌 시 그쪽이 진실): `design/design-tokens.md`(+ **`design/tokens.css`** 구현체) · `design/design-system.md` · `lessons/ux.md` §7-8
-> **비-Streamlit 스택이면 §1 대신: `design/tokens.css`를 주입**(정적 HTML=`<link>`, FastHTML=`Style()`/hdrs) — `.pb-` 클래스(히어로·카드·단계배지·✓/!리스트)를 그대로 쓰면 토큰 점검(§2)이 자동 충족. ⚠️ 커스텀 클래스를 더 만들 땐 반드시 프리픽스(UI 프레임워크의 `.hero` 등과 충돌 — 실증된 함정).
+> **기본(FastHTML·정적 HTML): `design/tokens.css`를 주입** — FastHTML=`Style()`/hdrs, 정적=`<link>`. `.pb-` 클래스(히어로·카드·단계배지·✓/!리스트)를 그대로 쓰면 토큰 점검(§2)이 자동 충족. ⚠️ 커스텀 클래스를 더 만들 땐 반드시 프리픽스(UI 프레임워크의 `.hero` 등과 충돌 — 실증된 함정).
 
 ## 순서 (위에서 아래로 한 번)
 
-### 1. 테마 — 앱마다 `.streamlit/config.toml` 먼저
+### 1. 디자인 주입 — 기본: `tokens.css` / Streamlit이면 `.streamlit/config.toml`
 ```toml
 [theme]
 primaryColor = "#15314f"        # 토큰 primary(navy) — 문제 성격에 맞으면 교체 가능

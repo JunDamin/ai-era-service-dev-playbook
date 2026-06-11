@@ -19,7 +19,7 @@
 Claude Code 공식 마켓플레이스에서 설치(1회, 약 1분):
 1. Claude Code에서 `/plugin` 입력 → marketplace 탐색
 2. 추천: **frontend-design**(독창적·고품질 프런트엔드 — 정적 HTML 산출물·발표자료에 유용), **playwright**(브라우저 검증 루프에 필요 — `claude-craft/verification-loop.md`)
-- 동봉 `design-polish`와 역할 구분: **Streamlit 앱 마감 = design-polish**(이 리포 기본값) / **자유 HTML/리포트 디자인 = frontend-design 플러그인**.
+- 동봉 `design-polish`와 역할 구분: **이 리포 스택(FastHTML·Streamlit·정적 HTML) 앱 마감 = design-polish** / **자유 HTML/리포트 디자인 = frontend-design 플러그인**.
 
 ## 3. 우리 스킬 추가하는 법 (팀 확장)
 ```

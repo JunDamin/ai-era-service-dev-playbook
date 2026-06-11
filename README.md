@@ -11,7 +11,8 @@
 ```bash
 git clone https://github.com/JunDamin/ai-era-service-dev-playbook && cd ai-era-service-dev-playbook
 pip install -r requirements.txt
-streamlit run stack/templates/recommend_app.py     # 보일러플레이트 즉시 실행(키 없어도 mock)
+python stack/templates/fasthtml_app.py             # ★ 기본 보일러플레이트(키 없어도 mock)
+# 대안: streamlit run stack/templates/recommend_app.py  (Streamlit A~D 유형 템플릿)
 ```
 그다음 **Claude Code로 이 폴더를 열면** `CLAUDE.md`가 자동 로드 → AI가 플레이북을 이미 안다.
 새 작업은 한마디로 시작: **"새 앱 기획 시작"** → AI가 `playbook/01-planning-interview.md`로 질문을 던지며 함께 기획 → `stack/` 보일러플레이트 위에 빌드.

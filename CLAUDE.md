@@ -20,7 +20,7 @@ Claude는 이 파일을 운영체제로 삼는다. (전체 안내: `playbook/00-
 좋은 기본값(디자인 토큰·UX 동작·스택 설정·모듈)을 **미리 박아둬, 일정 수준까지는 결정 없이 작동**하게 한다.
 - **문제 고유한 것만 정한다.** 나머지는 기본값을 상속 → **필요할 때만 override.**
 - 색·간격·타이포·로딩·에러·복사/다운로드·confidence는 *물어보지 않고* 기본 적용.
-- 구현 위치: `design/`(토큰·테마) · `stack/templates/recommend_app.py`(동작 기본값) · `lessons/defaults.md`(원칙)
+- 구현 위치: `design/`(토큰·테마 — **`tokens.css`가 실행 구현체**) · `stack/templates/fasthtml_app.py`(동작 기본값) · `lessons/defaults.md`(원칙)
 
 ## 빌드 파이프라인 (척추)
 Input → Context Extraction → Candidate Discovery → Recommendation → Explanation → Action Planning → Artifact Generation
@@ -30,9 +30,10 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - 추천형(A) · 의사결정형(B) · 체크리스트형(C) · 문서생성형(D) → `patterns/`(README + 각 모듈) 참조
 - 대부분의 문제 = 2개 조합 (예: 혜택 추천 A + 신청가이드 D)
 
-## 기본 스택 (세팅 최소) — 단, 스택은 아이디어 크기에 비례
-- **기본값: Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출** — 단일 시나리오·수 시간 데모엔 이게 최속. **출발점: `stack/templates/`**.
-- **기본값에서 벗어나도 된다** — 아이디어가 요구하면(다화면 제품·복잡한 상호작용·정적 배포 등) 맞는 최소 스택을 쓰되, **벗어나는 이유를 §11에 한 문장으로** 적는다(Defaults-first의 override 규칙). → 선택 기준: `stack/fast-prototyping.md` §0
+## 기본 스택 — FastHTML 단일 파일 (스택은 아이디어 크기에 비례)
+- **기본값: FastHTML + `sess` + LLM 직접 호출 + `design/tokens.css` 주입** — LLM·제품감·멀티페이지를 한 번에(3-way 드라이런으로 검증). **출발점: `stack/templates/fasthtml_app.py`**.
+- **⚠️ 빌드 전 하네스 필수:** FastHTML 공식 LLM 문서 `https://fastht.ml/docs/llms-ctx.txt` 를 먼저 읽는다(환각 방지 — 실증됨). → 패턴·함정: `stack/fast-prototyping.md` §6
+- **기본값에서 벗어나도 된다** — 이유를 §11에 한 문장으로(Defaults-first의 override 규칙): 폼+결과 최소 코드 검증이면 Streamlit, LLM 불요·정적 배포면 HTML 단일 파일. → 선택 기준: `stack/fast-prototyping.md` §0
 - 어떤 스택이든 변하지 않는 것: 단일 진입점·세션 상태 저장(Rule③)·키 없이 동작(mock)·무거운 오케스트레이션 프레임워크는 기본값 아님.
 
 ## 출력 계약
@@ -54,7 +55,7 @@ Input → Context Extraction → Candidate Discovery → Recommendation → Expl
 - **데모/발표 → `playbook/03-demo.md`** (검증 시나리오를 'S-tier 피치'로 — 빌드만큼 점수)
 - **UI/UX → `lessons/README.md` 체크리스트 항상 적용** (+ lessons/ux·data-input·defaults·dashboard·ai-chat·mvp)
 - **디자인(색·간격·타이포) → `design/design-tokens.md`(기본값)·`design/design-system.md`** · **UI 마감 → `design-polish` 스킬**(동봉, `.claude/skills/`) · 스킬 안내 → `claude-craft/skills-setup.md`
-- **스택·빌드 → `stack/templates/recommend_app.py`·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
+- **스택·빌드 → `stack/templates/fasthtml_app.py`(기본)·`stack/fast-prototyping.md`** · **데이터 → `data-patterns/`**
 - **엔지니어링 → `method/README.md`**(컨텍스트·스펙·하네스·에이전트vs워크플로·도구ACI — 한 파일)
 - **프롬프트 → `prompts/`** · **Claude Code 실전 → `claude-craft/`** · **근거 → `research/`**
 

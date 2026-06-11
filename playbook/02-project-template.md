@@ -60,8 +60,8 @@
 ## 11. AI Coding Instructions (개발 지시서)
 > Claude에게 줄 빌드 규칙. 위 1~10을 근거로 아래를 **강제**한다.
 
-- **스택:** 기본값 = Streamlit 단일 파일 + `st.session_state` + LLM 직접 호출 → `stack/`
-  - 기본값에서 벗어나면 **이유 한 문장**: > _(예: "지도 드래그 상호작용이 핵심이라 정적 HTML+JS")_ → 선택 기준 `stack/fast-prototyping.md` §0
+- **스택:** 기본값 = **FastHTML 단일 파일**(+`design/tokens.css`, 빌드 전 llms-ctx 하네스) → `stack/templates/fasthtml_app.py`
+  - 기본값에서 벗어나면 **이유 한 문장**: > _(예: "내부 검증용 최소 폼이라 Streamlit" / "LLM 불요 정적 배포라 HTML 단일 파일")_ → 선택 기준 `stack/fast-prototyping.md` §0
 - **요구사항 파일 먼저:** 기능 목록을 `requirements.md`로 작성(전부 'failing') → 기준점 → `claude-craft/workflow.md`
 - **반드시 포함:**
   - 샘플/고정 데이터 포함(실시간 API 의존 X) → `data-patterns/`

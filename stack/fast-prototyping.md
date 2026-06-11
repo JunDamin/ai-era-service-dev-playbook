@@ -1,15 +1,15 @@
-# stack — 빠른 프로토타이핑 (Streamlit 단일파일)
+# stack — 빠른 프로토타이핑 (기본값: FastHTML / 대안: Streamlit·정적 HTML)
 
-> 근거: Streamlit 공식 docs(1차) — 3차 리서치 검증. 출발점 코드: `stack/templates/recommend_app.py`.
+> 근거: FastHTML·Streamlit 공식 docs(1차) + 3-way 스택 비교 드라이런 실측. 출발점 코드: `stack/templates/fasthtml_app.py`(기본) · `recommend_app.py` 등(Streamlit A~D).
 
 ## 0. 스택 선택 규칙 — 프레임워크는 아이디어 크기에 비례 (3-way 드라이런 실측)
 > 같은 문제(민원 라우터)를 세 스택으로 빌드해 측정. **속도는 셋 다 분 단위로 충분히 빨라 승부처가 아니다** — 가르는 축은 **LLM 호출 가능 여부**와 **디자인 천장**.
 
 | 아이디어가 요구하는 것 | 스택 | 실측·근거 |
 |---|---|---|
-| 폼+결과 최소 코드 · 빠른 내부 검증 | **Streamlit 단일 파일 (기본값)** — §1~5 | 위젯=한 줄 최속. 단 **디자인 천장 낮음**(테마까지만, 세밀 CSS 곤란) |
-| **LLM 호출 + 제품감 둘 다** (대부분의 대회 데모) | **FastHTML+MonsterUI (적극 검토)** — §6 | 재구현 4분57초·**환각 0**(llms-ctx 하네스 필수). Python·uv 유지, 진짜 HTML이라 `design/tokens.css` 주입 시 천장 무제한 |
-| 코드 로직만으로 충분(LLM 불요) · 최고 제품감 | **정적 HTML+JS 단일 파일** | 재구현 2분30초·의존성 0. ⚠️ **LLM 서버 호출 불가**(키 노출) — 분류·계산·체크리스트(C형)에 최적 |
+| **LLM 호출 + 제품감 + (멀티페이지)** — 대부분의 대회 데모 | **FastHTML (기본값)** — §6, 템플릿 `fasthtml_app.py` | 재구현 4분57초·그린필드 3분55초·**환각 0**(llms-ctx 하네스 필수). Python·uv 유지, 진짜 HTML이라 `design/tokens.css` 주입 시 천장 무제한, 지도·3D도 Script 한 줄 |
+| 폼+결과 **최소 코드** · 빠른 내부 검증·실험 | Streamlit 단일 파일 — §1~5, 템플릿 A~D | 위젯=한 줄 최속. 단 **디자인 천장 낮음**(테마까지만, 세밀 CSS 곤란) — 데모 제품감이 점수일 땐 비추 |
+| 코드 로직만으로 충분(LLM 불요) · 정적 배포 | 정적 HTML+JS 단일 파일 | 재구현 2분30초·의존성 0. ⚠️ **LLM 서버 호출 불가**(키 노출) — 분류·계산·체크리스트(C형)에 최적 |
 | 복잡한 클라이언트 상호작용 · 다화면 제품 | React/Next 등 — 이미 4시간 프로젝트가 아닐 수 있음, 범위 재점검 | 미측정 |
 - **규칙:** 기본값에서 벗어나려면 **이유를 한 문장으로**(`02-template` §11에 기록). 못 쓰면 기본값.
 - **디자인 천장은 스택이 아니라 토큰이 결정** — `design/tokens.css`를 주입하면 정적 HTML과 FastHTML은 같은 룩(드라이런 검증). Streamlit만 주입이 제한적.
@@ -38,7 +38,7 @@
 - **어떻게:** `st.secrets` + `.streamlit/secrets.toml`(반드시 `.gitignore`). 배포는 Community Cloud Secrets 콘솔.
 - **4시간:** 키는 `secrets.toml` 또는 환경변수. 보일러플레이트는 키 없으면 mock으로 동작.
 
-## 6. FastHTML+MonsterUI 패턴 (대안 스택 — LLM+제품감)
+## 6. FastHTML 패턴 (★기본 스택 — LLM+제품감+멀티페이지)
 - **하네스 먼저(필수):** 신생 프레임워크라 학습 커버리지가 얇다 → 코딩 전에 **공식 LLM 문서를 컨텍스트로 주입**: `https://fastht.ml/docs/llms-ctx.txt`(+ MonsterUI README). 이걸로 드라이런에서 **환각 0** 달성 — 생략하면 FastAPI 패턴과 혼동하는 환각이 알려진 문제.
 - **골격:** `fast_app(hdrs=(Theme.slate.headers(), <tokens.css 주입>))` → `@rt` 라우트 → FT 컴포넌트(위치 인자=자식, 명명 인자=속성, `cls`=class) → HTMX 부분 업데이트(`hx_post=fn, hx_target="#id"`).
 - **디자인:** `design/tokens.css`를 `Style()`로 주입 → 정적 HTML과 동급 룩. **커스텀 클래스는 `.pb-` 프리픽스** — FrankenUI가 `.hero` 같은 클래스를 선점하고 있어 충돌하면 레이아웃이 포개진다(실증).

@@ -21,7 +21,7 @@
 
 ## ~~6. FastHTML 템플릿 승격~~ ✅ 완료 (2026-06-11)
 - 검증 완료: ① 재구현 비교(4분57초·환각0·토큰 주입 시 제품감 동급) ② **그린필드 시연 3분55초** — 멀티페이지 위저드·세션 누적·Leaflet 지도 입력·Three.js 3D까지(`playbook-dryrun-fasthtml-showcase`).
-- 완료: `stack/templates/fasthtml_app.py` 동봉(위저드+tokens.css+llms-ctx 안내, e2e 검증). 기본값 교체 여부만 추후 재논의.
+- 완료: `stack/templates/fasthtml_app.py` 동봉(위저드+tokens.css+llms-ctx 안내, e2e 검증). **기본값 교체도 완료**(2026-06-11, 사용자 결정) — FastHTML이 기본 스택, Streamlit은 최소 코드 대안.
 - 적극 검토 방침(사용자 결정): LLM+제품감이 둘 다 필요한 문제에선 FastHTML을 우선 후보로.
 
 ## 5. UX 수입처 확장

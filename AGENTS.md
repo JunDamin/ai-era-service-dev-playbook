@@ -10,7 +10,8 @@
 ## 명령어
 ```bash
 pip install -r requirements.txt
-streamlit run stack/templates/recommend_app.py   # 보일러플레이트 실행(키 없어도 mock 동작)
+python stack/templates/fasthtml_app.py           # 기본 보일러플레이트(키 없어도 mock 동작)
+streamlit run stack/templates/recommend_app.py   # 대안: Streamlit A~D 유형 템플릿
 ```
 
 ## 항상 적용 (5대 Rule)
@@ -18,7 +19,7 @@ streamlit run stack/templates/recommend_app.py   # 보일러플레이트 실행(
 4. 모든 추천은 **결과물**(체크리스트·문서·다운로드)을 생성한다. 5. 새 정보 생성 말고 기존 정보를 **압축·우선순위화·행동화**.
 
 ## 스택
-- **기본값: Streamlit 단일 파일** + 세션 상태 + LLM 직접 호출. 프레임워크는 아이디어 크기에 비례 — 벗어나면 이유 한 문장(→ `stack/fast-prototyping.md` §0).
+- **기본값: FastHTML 단일 파일** + 세션 + LLM 직접 호출 + `design/tokens.css`. **빌드 전 `https://fastht.ml/docs/llms-ctx.txt` 를 먼저 읽을 것**(환각 방지). 프레임워크는 아이디어 크기에 비례 — 벗어나면 이유 한 문장(Streamlit=최소 코드 검증·HTML=LLM 불요 정적 → `stack/fast-prototyping.md` §0).
 - 실시간 API 의존 금지 — 큐레이션한 **고정 데이터**(`data-patterns/`) + 공식 출처 링크. AI는 자격 '판정'을 하지 않는다.
 
 ## 구조 (필요할 때만 읽기 — progressive disclosure)
