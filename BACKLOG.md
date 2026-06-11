@@ -19,9 +19,9 @@
 ## 4. design-polish 스킬 도그푸딩
 - 무엇: 드라이런 앱 1개에 동봉 스킬을 실제로 돌려 스킬 자체를 검증·개선.
 
-## 6. FastHTML 템플릿 승격 (그린필드 검증 ✅ 완료 — 남은 건 템플릿 작성)
+## ~~6. FastHTML 템플릿 승격~~ ✅ 완료 (2026-06-11)
 - 검증 완료: ① 재구현 비교(4분57초·환각0·토큰 주입 시 제품감 동급) ② **그린필드 시연 3분55초** — 멀티페이지 위저드·세션 누적·Leaflet 지도 입력·Three.js 3D까지(`playbook-dryrun-fasthtml-showcase`).
-- 남은 일: `stack/templates/`에 FastHTML 템플릿(위저드 골격 + tokens.css 주입 + llms-ctx 안내) 추가, 기본값 교체 여부 재논의.
+- 완료: `stack/templates/fasthtml_app.py` 동봉(위저드+tokens.css+llms-ctx 안내, e2e 검증). 기본값 교체 여부만 추후 재논의.
 - 적극 검토 방침(사용자 결정): LLM+제품감이 둘 다 필요한 문제에선 FastHTML을 우선 후보로.
 
 ## 5. UX 수입처 확장
