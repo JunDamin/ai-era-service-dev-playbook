@@ -43,6 +43,7 @@
 - **골격:** `fast_app(hdrs=(Theme.slate.headers(), <tokens.css 주입>))` → `@rt` 라우트 → FT 컴포넌트(위치 인자=자식, 명명 인자=속성, `cls`=class) → HTMX 부분 업데이트(`hx_post=fn, hx_target="#id"`).
 - **디자인:** `design/tokens.css`를 `Style()`로 주입 → 정적 HTML과 동급 룩. **커스텀 클래스는 `.pb-` 프리픽스** — FrankenUI가 `.hero` 같은 클래스를 선점하고 있어 충돌하면 레이아웃이 포개진다(실증).
 - **로직/UI 분리 동일 적용:** 로직은 모듈 레벨, `serve()`는 `__main__` 가드 → 2단계 검증 그대로.
+- **멀티페이지·외부 JS 검증됨(그린필드 3분55초):** 라우트=페이지(위저드 P4·check-answers가 자연스럽게), `sess`로 입력 누적(쿠키 ~4KB 한계 주의), **브라우저에서 되는 건 전부 됨** — Leaflet 지도 클릭을 폼 입력으로, Three.js WebGL 3D를 `Script(src=)` 한 줄로(Streamlit의 컴포넌트 래퍼 제약 없음).
 
 ### FastHTML/uvicorn 함정 (드라이런 실증)
 - **데모는 `serve(reload=False)`** — 리로더(WatchFiles)는 ① OneDrive 폴더에서 변경 감지를 누락하고 ② 죽일 때 **워커 자식이 포트를 물고 살아남는다**(Windows 좀비 — 새 서버와 동시 bind되어 구버전이 응답). 수정 후엔 그냥 재시작이 빠르다.
