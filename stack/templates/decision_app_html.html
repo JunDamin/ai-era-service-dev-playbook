@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<!--
+  ════════════════════════════════════════════════════════════════════════
+  Type B · 의사결정/위험 — 정적 HTML 단일파일판 (decision_app.py의 vanilla JS 형제)
+  ════════════════════════════════════════════════════════════════════════
+  무엇:   상황 신호를 받아 위험도·왜·지금 할 행동·위치기반 후보·초안(.md)을 한 파일로.
+  언제 고르나:
+    - LLM 불필요 + 정적 배포(반입·망분리·오프라인 데모)인데 B형 메커니즘이 필요할 때.
+    - decision_app.py(Streamlit)는 LLM 설명을 붙일 때, 이 파일은 빌드/런타임 0일 때.
+    - (생활안전 출제처럼) 정적 HTML로 빨리 조립해야 하는 본선용 — 끌어쓰고 데이터만 교체.
+  기본값 메커니즘 (★ patterns/decision.md ⓐⓑⓒ — 도메인을 바꿔도 유지하라):
+    ⓐ 신호는 예/아니오/'모름' 트라이스테이트 — 모름=0 아니라 위험 가산(미확인=리스크).
+       방향은 신호별 yes_is_bad(불리언)로 정한다. 모름 가산 기본 = round(weight*0.66).
+    ⓑ 못 판정해도 행동은 준다 — 모름→확인 행동, 적신호→대응 행동(확인처 링크).
+    ⓒ 점수만 주지 말고 신호별 기여를 펼쳐라(왜 이 위험도인지).
+  교체 지점:  아래 SIGNALS / CANDIDATES / SUPPORTS 3개 placeholder만 도메인에 맞게.
+  주의:  AI가 판정하지 않는다 — '확인 필요' + 출처. 모든 데이터는 샘플/예시(실시간 API 금지).
+  ════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>위험 점검 · 위험도·행동·후보·초안 (Type B 템플릿)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+/* design/tokens.css 인라인(.pb- 프리픽스 — 프레임워크 충돌 방지) */
+:root{
+  --pb-navy:#15314f; --pb-navy2:#2a5180; --pb-ink:#1b2330; --pb-muted:#5d6877;
+  --pb-line:#d9e1ea; --pb-tint:#f4f7fb; --pb-bg:#ffffff;
+  --pb-ok:#1d8a3c; --pb-warn:#d99413; --pb-bad:#cc2f2f;
+  --pb-s2:8px; --pb-s3:12px; --pb-s4:16px; --pb-s5:24px; --pb-s6:32px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--pb-tint);color:var(--pb-ink);line-height:1.6;letter-spacing:-0.01em;
+  font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+body.pb-large{font-size:118%}
+.pb-wrap{max-width:760px;margin:0 auto;padding:40px 20px 64px}
+.pb-hero{margin-bottom:var(--pb-s6)}
+.pb-hero .pb-badge{display:inline-block;background:var(--pb-navy);color:#fff;font-size:12px;
+  font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:var(--pb-s3)}
+.pb-hero h1{font-size:28px;font-weight:800;line-height:1.3;margin:0 0 var(--pb-s2);color:var(--pb-navy)}
+.pb-hero p{color:var(--pb-muted);margin:0;font-size:15px}
+.pb-a11y{margin-top:var(--pb-s4)}
+.pb-a11y button{background:var(--pb-bg);border:1px solid var(--pb-line);border-radius:999px;
+  padding:7px 14px;font-size:13px;font-weight:700;color:var(--pb-navy);cursor:pointer;font-family:inherit}
+.pb-card{background:var(--pb-bg);border:1px solid var(--pb-line);border-radius:14px;
+  padding:28px;margin-bottom:20px;box-shadow:0 1px 2px rgba(21,49,79,.04)}
+.pb-step{display:flex;gap:var(--pb-s3);align-items:flex-start;margin-bottom:var(--pb-s4)}
+.pb-stepnum{flex:none;width:28px;height:28px;border-radius:999px;background:var(--pb-navy);color:#fff;
+  font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+.pb-step h2{font-size:18px;font-weight:800;margin:2px 0;color:var(--pb-navy)}
+.pb-step .pb-sub{font-size:13px;color:var(--pb-muted)}
+label.pb-l{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--pb-ink)}
+select.pb-i{width:100%;border:1px solid var(--pb-line);border-radius:10px;
+  padding:11px 13px;font-size:14px;background:var(--pb-bg);font-family:inherit;color:var(--pb-ink)}
+select.pb-i:focus{outline:2px solid var(--pb-navy2);border-color:var(--pb-navy2)}
+.pb-row{display:flex;gap:var(--pb-s4)}.pb-row>div{flex:1}
+.pb-btn{background:var(--pb-navy);color:#fff;font-weight:700;font-size:15px;border:none;
+  border-radius:10px;padding:13px 22px;cursor:pointer;margin-top:var(--pb-s4);width:100%}
+.pb-btn:hover{background:var(--pb-navy2)}
+.pb-btn2{background:var(--pb-bg);color:var(--pb-navy);font-weight:700;border:1px solid var(--pb-line);
+  border-radius:10px;padding:11px 18px;cursor:pointer;font-family:inherit;font-size:14px}
+.pb-btn2:hover{background:var(--pb-tint)}
+/* 트라이스테이트 신호(예/아니오/모름) */
+.pb-sigrow{border-bottom:1px solid var(--pb-line);padding:14px 0}
+.pb-sigrow:last-child{border-bottom:none}
+.pb-sigrow .pb-q{font-size:14px;font-weight:700;margin-bottom:8px}
+.pb-tri{display:flex;gap:8px}
+.pb-tri button{flex:1;border:1px solid var(--pb-line);background:var(--pb-bg);border-radius:9px;
+  padding:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--pb-muted);font-family:inherit}
+.pb-tri button.on-yes{background:#fae7e7;border-color:var(--pb-bad);color:var(--pb-bad)}
+.pb-tri button.on-no{background:#e9f6ec;border-color:var(--pb-ok);color:var(--pb-ok)}
+.pb-tri button.on-unk{background:#fdf3e0;border-color:var(--pb-warn);color:#7a5408}
+.pb-src{font-size:12px;color:var(--pb-muted);margin-top:6px}
+#pb-result{display:none}
+.pb-gauge{display:flex;align-items:center;gap:14px;padding:18px;border-radius:12px;margin-bottom:var(--pb-s4)}
+.pb-gauge.lv-High{background:#fae7e7}.pb-gauge.lv-Med{background:#fbf2df}.pb-gauge.lv-Low{background:#e9f6ec}
+.pb-gauge .pb-dot{flex:none;width:46px;height:46px;border-radius:999px;display:flex;align-items:center;
+  justify-content:center;font-size:22px;color:#fff}
+.pb-gauge.lv-High .pb-dot{background:var(--pb-bad)}.pb-gauge.lv-Med .pb-dot{background:var(--pb-warn)}
+.pb-gauge.lv-Low .pb-dot{background:var(--pb-ok)}
+.pb-gauge .pb-lvtitle{font-size:18px;font-weight:800}
+.pb-gauge .pb-lvsub{font-size:13px;color:var(--pb-muted)}
+.pb-contrib{list-style:none;margin-top:var(--pb-s2)}
+.pb-contrib li{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:9px;margin-bottom:6px;font-size:13.5px}
+.pb-contrib .c-bad{background:#fae7e7}.pb-contrib .c-unk{background:#fdf3e0}.pb-contrib .c-safe{background:#e9f6ec}
+.pb-contrib .c-pts{font-weight:800;flex:none}
+.pb-contrib .c-bad .c-pts{color:var(--pb-bad)}.pb-contrib .c-unk .c-pts{color:#7a5408}
+.pb-contrib .c-safe .c-pts{color:var(--pb-ok)}
+details.pb-why summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--pb-navy2);margin-bottom:6px}
+.pb-action{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--pb-line);
+  border-radius:11px;margin-bottom:10px}
+.pb-action .pb-anum{flex:none;width:26px;height:26px;border-radius:999px;color:#fff;font-weight:800;
+  font-size:13px;display:flex;align-items:center;justify-content:center}
+.pb-action.k-bad .pb-anum{background:var(--pb-bad)}.pb-action.k-unk .pb-anum{background:var(--pb-warn)}
+.pb-action .pb-atext{font-size:14px;font-weight:700}
+.pb-action .pb-awhy{font-size:12.5px;color:var(--pb-muted);margin-top:3px}
+.pb-action a{color:var(--pb-navy2);font-weight:700;word-break:break-all;font-size:12.5px}
+.pb-cand{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--pb-line)}
+.pb-cand:last-child{border-bottom:none}
+.pb-cand .pb-cname{font-size:14px;font-weight:700}
+.pb-cand .pb-caddr{font-size:12.5px;color:var(--pb-muted);margin-top:2px}
+.pb-cand .pb-cdist{flex:none;font-size:13px;font-weight:800;color:var(--pb-navy2);text-align:right}
+.pb-route{background:var(--pb-tint);border-radius:10px;padding:14px 16px;margin:var(--pb-s2) 0;font-size:13.5px}
+.pb-route .pb-rt-name{font-weight:700;color:var(--pb-navy)}
+.pb-route a{color:var(--pb-navy2);font-weight:700;word-break:break-all;font-size:12.5px}
+#pb-draft{width:100%;min-height:260px;font-family:inherit;font-size:14px;color:var(--pb-ink);
+  border:1px solid var(--pb-line);border-radius:10px;padding:14px;line-height:1.65;resize:vertical}
+.pb-draft-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pb-draft-actions button{flex:1;min-width:150px;margin-top:0}
+.pb-note{background:#fdecec;border-radius:10px;padding:12px 14px;font-size:13px;margin-top:14px}
+.pb-correct{display:inline-block;background:transparent;border:none;color:var(--pb-muted);
+  font-size:11.5px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;margin-top:4px}
+.pb-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--pb-navy);
+  color:#fff;padding:12px 18px;border-radius:10px;font-size:13.5px;box-shadow:0 4px 16px rgba(21,49,79,.25);
+  opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:50}
+.pb-toast.show{opacity:1}
+.pb-srclabel{font-size:11.5px;color:var(--pb-muted);margin-top:6px}
+footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px}
+@media(max-width:480px){.pb-row{flex-direction:column;gap:0}.pb-hero h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="pb-wrap">
+
+  <header class="pb-hero">
+    <span class="pb-badge">Type B 템플릿 · 위험 점검</span>
+    <h1>상황을 고르면 위험도·이유·<br/>지금 할 행동까지 한 번에.</h1>
+    <p>신호에 답하면 위험도와 <b>지금 할 행동 1·2·3</b>, 가까운 후보·받을 수 있는 지원, 초안(.md)까지 만듭니다. 모름도 위험으로 봅니다.</p>
+    <div class="pb-a11y"><button id="pb-largeBtn" aria-pressed="false">가 글씨 크게</button></div>
+  </header>
+
+  <!-- ① 입력 -->
+  <section class="pb-card">
+    <div class="pb-step"><span class="pb-stepnum">1</span>
+      <div><h2>상황을 알려주세요</h2>
+        <div class="pb-sub">대신 입력해도 됩니다. 모르면 '모름'을 누르세요 — 모름도 위험으로 봅니다.</div></div></div>
+    <div class="pb-row">
+      <div><label class="pb-l" for="pb-region">지역/구역</label><select class="pb-i" id="pb-region"></select></div>
+      <div><label class="pb-l" for="pb-subject">대상</label><select class="pb-i" id="pb-subject"></select></div>
+    </div>
+    <label class="pb-l" style="margin-top:18px">위험 신호 점검 (예 / 아니오 / 모름)</label>
+    <div id="pb-signals"></div>
+    <button class="pb-btn" id="pb-analyzeBtn">위험도 보고 지금 할 행동 받기</button>
+  </section>
+
+  <div id="pb-result">
+    <!-- ② 위험도 + 왜(ⓒ) -->
+    <section class="pb-card">
+      <div class="pb-step"><span class="pb-stepnum">2</span>
+        <div><h2>위험도와 이유</h2><div class="pb-sub">위험도는 코드로 계산합니다. AI가 단정하지 않습니다.</div></div></div>
+      <div class="pb-gauge" id="pb-gauge">
+        <div class="pb-dot" id="pb-gaugeDot"></div>
+        <div><div class="pb-lvtitle" id="pb-gaugeTitle"></div><div class="pb-lvsub" id="pb-gaugeSub"></div></div>
+      </div>
+      <details class="pb-why" open>
+        <summary>신호별 기여 보기 — 왜 이 색인지</summary>
+        <ul class="pb-contrib" id="pb-contrib"></ul>
+      </details>
+    </section>
+
+    <!-- ③ 행동(ⓑ) -->
+    <section class="pb-card">
+      <div class="pb-step"><span class="pb-stepnum">3</span>
+        <div><h2>지금 할 행동</h2><div class="pb-sub">위험이 큰 순서입니다. 위에서부터 하세요.</div></div></div>
+      <div id="pb-actions"></div>
+    </section>
+
+    <!-- ④ 후보 + 지원 -->
+    <section class="pb-card">
+      <div class="pb-step"><span class="pb-stepnum">4</span>
+        <div><h2>가까운 후보 · 받을 수 있는 지원</h2><div class="pb-sub">지역 기준 가까운 순. 거리는 샘플 좌표 기준 추정입니다.</div></div></div>
+      <div id="pb-candidates"></div>
+      <div style="margin-top:18px;font-weight:800;font-size:14px;color:var(--pb-navy)">받을 수 있는 지원</div>
+      <div id="pb-supports"></div>
+    </section>
+
+    <!-- ⑤ 초안(완주) -->
+    <section class="pb-card">
+      <div class="pb-step"><span class="pb-stepnum">5</span>
+        <div><h2>요청·신고 초안</h2><div class="pb-sub">입력으로 자동 작성했습니다. 고친 뒤 내려받아 제출처에 붙여 넣으세요.</div></div></div>
+      <textarea id="pb-draft" aria-label="요청 신고 초안"></textarea>
+      <div class="pb-draft-actions">
+        <button class="pb-btn" id="pb-dlMd">초안 다운로드 (.md)</button>
+        <button class="pb-btn2" id="pb-copy">초안 복사</button>
+      </div>
+      <div class="pb-note">이 초안은 <b>보조 도구가 만든 생성물</b>입니다. 위험·자격 여부는 단정하지 않으며, 반드시 공식 출처로 확인이 필요합니다.</div>
+    </section>
+  </div>
+
+  <footer>Type B 정적 HTML 템플릿 — 모든 데이터는 <b>샘플/예시</b>이며 브라우저 밖으로 전송되지 않습니다.</footer>
+</div>
+
+<div class="pb-toast" id="pb-toast"></div>
+
+<script>
+/*CORE-START*/
+/* ════════ 데이터 placeholder (도메인에 맞게 교체) — 실시간 API 금지, 고정 샘플 ════════ */
+
+/* ⓐ 위험 신호. 방향은 yes_is_bad로:
+   yes_is_bad:true  → '예'가 위험(예: 증상이 있나요?)
+   yes_is_bad:false → '아니오'가 위험(예: 안전장치가 있나요?)
+   weight=적신호 가중, unknown_weight=모름 가산(기본 round(weight*0.66), 미확인=리스크 ⓐ).
+   bad_action=적신호 대응, unk_action=모름 확인 행동, confirm/confirm_url=확인처(ⓑ). */
+var SIGNALS = [
+  { id:"s1", q:"신호 1 — 핵심 위험 조건에 해당하나요?", yes_is_bad:true,  weight:6,
+    bad_action:"옵션 A의 대응 조치를 지금 실행하세요(도메인에 맞게 교체).",
+    unk_action:"신호 1을 확인처에서 직접 확인하세요 — 미확인은 위험으로 봅니다.",
+    confirm:"확인처 1", confirm_url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" },
+  { id:"s2", q:"신호 2 — 안전 전제가 갖춰져 있나요?",   yes_is_bad:false, weight:5,
+    bad_action:"옵션 B로 안전 전제를 보완한 뒤 진행하세요.",
+    unk_action:"신호 2의 충족 여부를 확인하세요 — 없으면 위험이 커집니다.",
+    confirm:"확인처 2", confirm_url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" },
+  { id:"s3", q:"신호 3 — 부가 위험 요소가 있나요?",     yes_is_bad:true,  weight:4,
+    bad_action:"옵션 C의 보완 조치를 확인하세요.",
+    unk_action:"신호 3을 확인하세요 — 폭염·전세 등 도메인 위험 요인으로 교체.",
+    confirm:"확인처 3", confirm_url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" },
+  { id:"s4", q:"신호 4 — 기본 수칙을 지키고 있나요?",   yes_is_bad:false, weight:3, unknown_weight:1,
+    bad_action:"옵션 D의 기본 수칙을 다시 챙기세요.",
+    unk_action:"기본 수칙 준수 여부를 확인하세요.",
+    confirm:"확인처 4", confirm_url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" }
+];
+var THRESHOLDS = { High:10, Med:5 }; /* total>=10 High, >=5 Med, else Low */
+
+/* 위치기반 후보(쉼터·대피소·AED·병원 등 무엇이든) — region prefix + 거리(샘플 좌표 추정). */
+var CANDIDATES = [
+  { name:"후보 가 (구역1)", region:"구역1", addr:"구역1 중앙로 12", dist_km:0.3, note:"운영 09:00–18:00", source:"샘플/예시 · 수집일 2026-06-10" },
+  { name:"후보 나 (구역1)", region:"구역1", addr:"구역1 시청로 5",  dist_km:0.6, note:"평일 09:00–18:00", source:"샘플/예시 · 수집일 2026-06-10" },
+  { name:"후보 다 (구역2)", region:"구역2", addr:"구역2 중앙대로 88", dist_km:1.2, note:"09:00–20:00", source:"샘플/예시 · 수집일 2026-06-10" },
+  { name:"후보 라 (구역2)", region:"구역2", addr:"구역2 둘레길 3",   dist_km:1.8, note:"화–일 09:00–21:00", source:"샘플/예시 · 수집일 2026-06-10" },
+  { name:"후보 마 (구역3)", region:"구역3", addr:"구역3 한들로 40",  dist_km:2.4, note:"평일 09:00–18:00", source:"샘플/예시 · 수집일 2026-06-10" },
+  { name:"후보 바 (구역3)", region:"구역3", addr:"구역3 건강로 7",   dist_km:2.9, note:"평일 09:00–17:00", source:"샘플/예시 · 수집일 2026-06-10" }
+];
+
+/* 지원/제도 — 대상·링크는 공식 도메인 형태의 placeholder. */
+var SUPPORTS = [
+  { name:"지원제도 1", who:"대상 조건 1(도메인에 맞게 교체)", url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" },
+  { name:"지원제도 2", who:"대상 조건 2", url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" },
+  { name:"지원제도 3", who:"누구나",      url:"https://example.go.kr/", source:"샘플/예시 — 공식 안내 형태" }
+];
+
+var REGIONS = ["구역1","구역2","구역3"];                 /* 교체: 동/구 등 */
+var SUBJECTS = [{v:"self",label:"본인"},{v:"care",label:"가족·이웃"}]; /* 교체: 대상 유형 */
+
+/* ════════ 순수 함수 (UI와 분리 — decision_app.py의 score/build_actions와 대응) ════════ */
+
+/* 모름 가산 기본값: unknown_weight 없으면 round(weight*0.66) (ⓐ 비대칭). */
+function unkWeight(sig){ return sig.unknown_weight != null ? sig.unknown_weight : Math.round(sig.weight * 0.66); }
+
+/* ⓐ 한 신호의 기여. '예/아니오/모름' 트라이스테이트, 모름=0 아님. */
+function sigPoints(sig, ans){
+  var yesIsBad = (sig.yes_is_bad === undefined) ? true : sig.yes_is_bad;
+  var badAns = yesIsBad ? "예" : "아니오";
+  if(ans === "모름")  return { pts: unkWeight(sig), kind:"unk" };
+  if(ans === badAns)  return { pts: sig.weight,     kind:"bad" };
+  return { pts: 0, kind:"safe" };
+}
+
+/* ⓐ+ⓒ 산정은 코드로 + 신호별 기여 반환(큰 순, 같으면 위험>모름>양호). */
+function score(answers){
+  var total = 0, contribs = [];
+  SIGNALS.forEach(function(sig){
+    var ans = answers[sig.id] || "모름";
+    var r = sigPoints(sig, ans);
+    total += r.pts;
+    contribs.push({ id:sig.id, label:sig.q, answer:ans, pts:r.pts, kind:r.kind, sig:sig });
+  });
+  var rank = { bad:2, unk:1, safe:0 };
+  contribs.sort(function(a,b){ return (b.pts - a.pts) || (rank[b.kind] - rank[a.kind]); });
+  var level = total >= THRESHOLDS.High ? "High" : (total >= THRESHOLDS.Med ? "Med" : "Low");
+  return { total:total, level:level, contribs:contribs };
+}
+
+/* ⓑ 모름→확인 행동, 적신호→대응 행동(점수순, 확인처 링크). */
+function buildActions(res){
+  var out = [];
+  res.contribs.forEach(function(c){
+    if(c.kind === "bad") out.push({ kind:"bad", text:c.sig.bad_action, why:c.label + " → 답: " + c.answer,
+                                    link:c.sig.confirm, link_url:c.sig.confirm_url });
+    if(c.kind === "unk") out.push({ kind:"unk", text:c.sig.unk_action, why:c.label + " → 모름(미확인=위험)",
+                                    link:c.sig.confirm, link_url:c.sig.confirm_url });
+  });
+  if(out.length === 0) out.push({ kind:"unk", text:"현재 큰 위험 신호는 없습니다. 기본 수칙을 유지하세요.",
+                                  why:"모든 신호 양호", link:"기본 행동요령", link_url:"https://example.go.kr/" });
+  return out;
+}
+
+/* 공용: region prefix 매칭 → 거리순 → 상위 N.
+   생활안전 후보(쉼터·대피소·AED·병원 등)에 그대로 재사용. regionPrefix는 보통 입력 지역값. */
+function nearbyTopN(candidates, regionPrefix, n){
+  n = n || 4;
+  var p = regionPrefix || "";
+  function rank(c){
+    if(c.region === p) return 0;                 // 정확 일치
+    if(p && c.region.indexOf(p.slice(0,2)) === 0) return 1; // prefix 부분 일치
+    return 2;                                     // 그 외(전역 fallback)
+  }
+  return candidates.slice()
+    .sort(function(a,b){ return (rank(a) - rank(b)) || (a.dist_km - b.dist_km); })
+    .slice(0, n);
+}
+
+/* 완주 Artifact: 입력으로 .md 초안 자동 생성. */
+function buildDraft(region, subjectLabel, res, actions, candidates){
+  var L = [];
+  L.push("# 위험 점검 / 요청 메모");
+  L.push("");
+  L.push("- 작성: Type B 위험 점검 템플릿(보조 생성물 · 샘플 데모)");
+  L.push("- 대상: " + subjectLabel);
+  L.push("- 지역: " + (region || "(미입력)"));
+  L.push("- 종합 위험도: " + res.level + " (점수 " + res.total + ")");
+  L.push("");
+  L.push("## 확인된 위험 신호");
+  res.contribs.forEach(function(c){
+    if(c.kind === "safe") return;
+    var mark = c.kind === "bad" ? "[위험]" : "[미확인=위험]";
+    L.push("- " + mark + " " + c.label + " — 답: " + c.answer + " (위험기여 " + c.pts + ")");
+  });
+  L.push("");
+  L.push("## 지금 할 행동");
+  actions.forEach(function(a, i){
+    L.push((i + 1) + ". " + a.text);
+    if(a.link) L.push("   확인처: " + a.link + " (" + a.link_url + ")");
+  });
+  L.push("");
+  L.push("## 가까운 후보(샘플)");
+  candidates.forEach(function(c){ L.push("- " + c.name + " · " + c.addr + " · 약 " + c.dist_km + "km · " + c.note); });
+  L.push("");
+  L.push("> 본 메모는 보조 도구 생성물입니다. 위험·자격 여부는 단정하지 않으며 공식 출처로 확인이 필요합니다.");
+  return L.join("\n");
+}
+/*CORE-END*/
+
+/* ════════ UI 바인딩 (순수 함수만 호출) ════════ */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var answers = {}; // {sigId: 예|아니오|모름}
+
+  REGIONS.forEach(function(r){
+    var o = document.createElement("option"); o.value = r; o.textContent = r; $("pb-region").appendChild(o);
+  });
+  SUBJECTS.forEach(function(s){
+    var o = document.createElement("option"); o.value = s.v; o.textContent = s.label; $("pb-subject").appendChild(o);
+  });
+
+  // 신호 입력(트라이스테이트). 기본값 = 모름(미확인=위험 ⓐ).
+  var sigWrap = $("pb-signals");
+  SIGNALS.forEach(function(sig){
+    answers[sig.id] = "모름";
+    var row = document.createElement("div"); row.className = "pb-sigrow";
+    var q = document.createElement("div"); q.className = "pb-q"; q.textContent = sig.q;
+    var tri = document.createElement("div"); tri.className = "pb-tri";
+    ["예","아니오","모름"].forEach(function(val){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = val;
+      b.addEventListener("click", function(){
+        answers[sig.id] = val;
+        Array.prototype.forEach.call(tri.children, function(c){ c.className = ""; });
+        b.className = val === "예" ? "on-yes" : (val === "아니오" ? "on-no" : "on-unk");
+      });
+      tri.appendChild(b);
+    });
+    tri.children[2].className = "on-unk"; // 기본 모름 하이라이트
+    var src = document.createElement("div"); src.className = "pb-src"; src.textContent = "출처: " + sig.source;
+    row.appendChild(q); row.appendChild(tri); row.appendChild(src);
+    sigWrap.appendChild(row);
+  });
+
+  function toast(msg){
+    var t = $("pb-toast"); t.textContent = msg; t.className = "pb-toast show";
+    setTimeout(function(){ t.className = "pb-toast"; }, 2400);
+  }
+  function subjectLabel(v){
+    var found = SUBJECTS.filter(function(s){ return s.v === v; })[0];
+    return found ? found.label : v;
+  }
+
+  var lastDraftName = "위험점검_메모";
+
+  function render(){
+    var region = $("pb-region").value, subj = $("pb-subject").value;
+    var res = score(answers);
+    var actions = buildActions(res);
+    var candidates = nearbyTopN(CANDIDATES, region, 4);
+
+    // ② 게이지 + 자기교정 훅(비대칭 게이트): 모름이 위험을 끌어올렸으면 알림
+    var ui = { High:["🔴","위험 높음","지금 바로 행동이 필요합니다."],
+               Med:["🟠","주의","아래 행동으로 위험을 낮추세요."],
+               Low:["🟢","비교적 안전","기본 수칙을 유지하세요."] }[res.level];
+    var g = $("pb-gauge"); g.className = "pb-gauge lv-" + res.level;
+    $("pb-gaugeDot").textContent = ui[0];
+    $("pb-gaugeTitle").textContent = ui[1] + " · 점수 " + res.total;
+    $("pb-gaugeSub").textContent = ui[2];
+    var unkPts = res.contribs.reduce(function(s,c){ return s + (c.kind === "unk" ? c.pts : 0); }, 0);
+    if(unkPts > 0 && res.level !== "Low")
+      toast("미확인(모름)이 위험을 +" + unkPts + " 올렸습니다 — 확인 안 한 것 자체가 리스크입니다.");
+
+    // ⓒ 기여 펼침
+    var cl = $("pb-contrib"); cl.innerHTML = "";
+    res.contribs.forEach(function(c){
+      var li = document.createElement("li"); li.className = "c-" + c.kind;
+      var mark = c.kind === "bad" ? "위험" : (c.kind === "unk" ? "미확인" : "양호");
+      var label = document.createElement("span"); label.textContent = "[" + mark + "] " + c.label + " — " + c.answer;
+      var pts = document.createElement("span"); pts.className = "c-pts"; pts.textContent = "+" + c.pts;
+      li.appendChild(label); li.appendChild(pts); cl.appendChild(li);
+    });
+
+    // ③ 행동
+    var al = $("pb-actions"); al.innerHTML = "";
+    actions.forEach(function(a, i){
+      var d = document.createElement("div"); d.className = "pb-action k-" + a.kind;
+      var num = document.createElement("div"); num.className = "pb-anum"; num.textContent = (i + 1);
+      var box = document.createElement("div");
+      var t = document.createElement("div"); t.className = "pb-atext"; t.textContent = a.text;
+      var w = document.createElement("div"); w.className = "pb-awhy"; w.textContent = "왜: " + a.why;
+      box.appendChild(t); box.appendChild(w);
+      if(a.link){
+        var lk = document.createElement("a"); lk.href = a.link_url; lk.target = "_blank"; lk.rel = "noopener";
+        lk.textContent = "확인처: " + a.link;
+        box.appendChild(document.createElement("br")); box.appendChild(lk);
+      }
+      d.appendChild(num); d.appendChild(box); al.appendChild(d);
+    });
+
+    // ④ 후보(거리순) + 지원
+    var cdl = $("pb-candidates"); cdl.innerHTML = "";
+    candidates.forEach(function(c){
+      var row = document.createElement("div"); row.className = "pb-cand";
+      var left = document.createElement("div");
+      var nm = document.createElement("div"); nm.className = "pb-cname"; nm.textContent = c.name;
+      var ad = document.createElement("div"); ad.className = "pb-caddr"; ad.textContent = c.addr + " · " + c.note;
+      var sc = document.createElement("div"); sc.className = "pb-srclabel"; sc.textContent = c.source;
+      var corr = document.createElement("button"); corr.className = "pb-correct"; corr.textContent = "정보 틀림/없어짐 신고";
+      corr.addEventListener("click", function(){ toast("신고가 접수되었습니다(데모). 추가·『확인 필요』 표시만 가능하며, 자동 삭제는 공식 채널 검토를 거칩니다."); });
+      left.appendChild(nm); left.appendChild(ad); left.appendChild(sc); left.appendChild(corr);
+      var dist = document.createElement("div"); dist.className = "pb-cdist"; dist.textContent = "약 " + c.dist_km + "km";
+      row.appendChild(left); row.appendChild(dist); cdl.appendChild(row);
+    });
+
+    var supl = $("pb-supports"); supl.innerHTML = "";
+    SUPPORTS.forEach(function(sp){
+      var box = document.createElement("div"); box.className = "pb-route";
+      var nm = document.createElement("div"); nm.className = "pb-rt-name"; nm.textContent = sp.name;
+      var who = document.createElement("div"); who.textContent = "대상: " + sp.who;
+      var lk = document.createElement("a"); lk.href = sp.url; lk.target = "_blank"; lk.rel = "noopener"; lk.textContent = sp.url;
+      var sc = document.createElement("div"); sc.className = "pb-srclabel"; sc.textContent = sp.source;
+      box.appendChild(nm); box.appendChild(who); box.appendChild(lk); box.appendChild(sc);
+      supl.appendChild(box);
+    });
+
+    // ⑤ 초안(완주)
+    $("pb-draft").value = buildDraft(region, subjectLabel(subj), res, actions, candidates);
+    lastDraftName = "위험점검_메모_" + region;
+  }
+
+  $("pb-analyzeBtn").addEventListener("click", function(){
+    render();
+    $("pb-result").style.display = "block";
+    $("pb-result").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+
+  $("pb-largeBtn").addEventListener("click", function(){
+    var on = document.body.classList.toggle("pb-large");
+    this.setAttribute("aria-pressed", on ? "true" : "false");
+    this.textContent = on ? "가 글씨 보통" : "가 글씨 크게";
+  });
+
+  function download(text, filename, mime){
+    var blob = new Blob([text], { type: mime + ";charset=utf-8" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+  }
+  $("pb-dlMd").addEventListener("click", function(){ download($("pb-draft").value, lastDraftName + ".md", "text/markdown"); });
+  $("pb-copy").addEventListener("click", function(){
+    navigator.clipboard.writeText($("pb-draft").value).then(
+      function(){ toast("초안을 복사했습니다."); },
+      function(){ toast("복사 권한이 없어 직접 선택해 복사해 주세요."); });
+  });
+})();
+</script>
+</body>
+</html>

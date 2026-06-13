@@ -8,6 +8,7 @@
 |---|---|---|
 | **A 추천/매칭** | `recommend_app.py` | 조건 → 받을 수 있는 것 추천 + 신청 연결 |
 | **B 의사결정/위험** | `decision_app.py` | 상황 → 위험도·우선순위·행동계획 |
+| **B 의사결정/위험 (정적 HTML판)** | `decision_app_html.html` | B형의 정적 HTML판 — 정적 배포·반입제약 본선용(LLM·런타임 0). 같은 ⓐⓑⓒ 메커니즘을 vanilla JS로 |
 | **C 체크리스트/준비** | `checklist_app.py` | 상황 → 준비 항목·타임라인 체크리스트 |
 | **D 문서 생성** | `document_app.py` | 사실 → 민원/신청서/보고서 초안 |
 | **★ 위저드 (기본 스택)** | `fasthtml_app.py` | **FastHTML 멀티페이지** — 기본 출발점. 라우트=페이지·세션 누적·confirm·tokens.css·LLM mock. A~D 메커니즘(patterns/*.md)을 이 골격에 얹는다 |
