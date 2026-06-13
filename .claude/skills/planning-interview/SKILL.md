@@ -15,6 +15,7 @@ description: 새 앱·서비스 기획을 시작할 때 사용. "새 앱 기획 
 4. §1~10 승인 후 §11(개발 지시서)을 생성하고, 문제를 `patterns/README.md`의 모듈(A/B/C/D)에 매핑해 빌드로 넘어간다.
 
 ## 빌드로 넘어가기 전 체크
+- [ ] **해피패스 유저저니·스토리보드 5칸**(§5b)을 정리했다 — 사람↔AI 공용 기준(정렬·검증·발표·데모 겸용). 와이어프레임/IA/플로우차트는 안 그림.
 - [ ] 성공 기준(pass/fail) 1개가 §10에 있다 → `claude-craft/verification-loop.md`
 - [ ] 스택 기본값에서 벗어나면 §11에 이유 한 문장 → `stack/fast-prototyping.md` §0
 - [ ] `lessons/README.md` 항상-적용 체크리스트를 읽었다
