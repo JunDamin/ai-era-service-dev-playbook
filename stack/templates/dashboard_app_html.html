@@ -88,7 +88,7 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
   <header class="pb-hero">
     <span class="pb-badge">조망 템플릿 · 현황 대시보드</span>
     <h1>이게 왜 문제인가 — 규모·지역성·추이를<br/>주장이 아니라 숫자로.</h1>
-    <p>연도·지표를 바꾸고 지도에서 시도를 누르면 그 시도의 시군구로 드릴다운됩니다(필요한 시도 파일만 그때 호출). 문제정의 ①단계와 관리자뷰의 근거 도구. <b>시군구 단위 수치는 샘플(데모)</b>입니다.</p>
+    <p>연도·지표를 바꾸고 지도에서 시도를 누르면 그 시도의 시군구로 드릴다운됩니다(필요한 시도 파일만 그때 호출). 문제정의 ①단계와 관리자뷰의 근거 도구. <b>시군구는 KOSIS 실데이터(이름 매칭분)</b>이며, <b>미매칭은 샘플(데모)</b>로 채웁니다.</p>
     <div class="pb-usewarn">이건 <b>문제정의/현황 근거 도구</b>입니다 — 국민 서비스 정문(행동 흐름)이 아닙니다.</div>
   </header>
 
@@ -111,7 +111,7 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
     </div>
     <div class="pb-filterbar">
       <span>선택 지역</span><span class="pb-chip none" id="pb-chip">전체</span>
-      <span style="color:var(--pb-muted)">시도를 누르면 그 시도의 <b>시군구</b>로 드릴다운합니다 <b>(시군구 수치는 샘플·데모)</b>.</span>
+      <span style="color:var(--pb-muted)">시도를 누르면 그 시도의 <b>시군구</b>로 드릴다운합니다 <b>(시군구: KOSIS 실데이터 · 미매칭은 샘플)</b>.</span>
     </div>
   </section>
 
@@ -140,17 +140,18 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
   </div>
 
   <footer>
-    조망 정적 HTML 템플릿 · ECharts 5 — <b>시도 인구·밀도는 KOSIS 주민등록인구 실데이터(2020~2025)</b>입니다.
-    단 <b>시군구 드릴다운 수치는 시도 값을 결정적으로 배분한 샘플(데모)</b>로, 실제 시군구 통계가 아닙니다.<br/>
+    조망 정적 HTML 템플릿 · ECharts 5 — <b>시도·시군구 인구·밀도는 KOSIS 주민등록인구 실데이터(2020~2025)</b>입니다.
+    단 <b>이름 미매칭 시군구</b>는 시도 값을 결정적으로 배분한 <b>샘플(데모)</b>로 채웠습니다(툴팁·라벨에 "(샘플)" 표기).<br/>
     데이터는 브라우저 밖으로 전송되지 않습니다. 갱신: data-patterns/stats/fetch_population_kosis.py (실시간 API 금지·고정 데이터).
   </footer>
 </div>
 
 <script>
 /*CORE-START*/
-/* ════════ 데이터 — 시도: KOSIS 실데이터 / 시군구 드릴: 샘플 ════════
-   시도 인구·밀도 = KOSIS 주민등록인구 실데이터(2020~2025) — data-patterns/stats/population_kosis.json
-   + area_sido.json 으로 밀도 계산. 시군구 드릴값만 결정적 샘플. 실시간 API 금지(고정 데이터). */
+/* ════════ 데이터 — 시도·시군구: KOSIS 실데이터(미매칭 시군구만 샘플) ════════
+   시도 인구·밀도 = KOSIS 주민등록인구 실데이터(2020~2025) — data-patterns/stats/population_kosis.json + area_sido.json.
+   시군구 = data-patterns/stats/population_sgg_kosis.json(첫 드릴 때 1회 fetch → SGG_REAL 캐시).
+   이름 매칭 시군구는 실값, 미매칭은 결정적 샘플(sggSampleValues)로 폴백. 실시간 API 금지(고정 데이터). */
 
 /* 17개 시도. name 은 GeoJSON 의 시도명과 정확히 일치해야 매칭됨(매우 중요). */
 var REGIONS = ["서울특별시","부산광역시","대구광역시","인천광역시","광주광역시","대전광역시",
@@ -176,6 +177,27 @@ var SIDO_CODE = {
 /* 시도별 시군구 분할 GeoJSON(드릴용) — 클릭 시 그 시도 파일 하나만 fetch.
    전체 시군구(18MB)는 절대 한꺼번에 로드하지 않는다. properties.name=시군구명. */
 var SGG_GEOJSON_BASE = "../../data-patterns/geo/sgg/"; /* + 코드 + ".geojson" */
+
+/* 시군구 KOSIS 실데이터(주민등록인구·밀도, 2020~2025).
+   구조: { years:[...], data:{ "<시도코드>":{ "<시군구명>":{ pop:[6], density:[6]|null } } } }
+   시도코드 = SIDO_CODE 값(문자열) · 시군구명 = sgg geojson properties.name 과 매칭.
+   첫 드릴 시 한 번만 fetch 해 SGG_REAL 에 캐시. 실패하면 null 유지 → 전부 샘플 폴백(graceful). */
+var SGG_REAL = null;          /* 로드 성공 시 위 JSON 객체 */
+var SGG_REAL_TRIED = false;   /* 중복 fetch 방지 */
+var SGG_REAL_URL = "../../data-patterns/stats/population_sgg_kosis.json";
+
+/* 실데이터에서 (시도코드, 시군구명, metricKey, yearIndex) 값을 꺼낸다.
+   값이 있으면 숫자, 없으면(미매칭/면적 null 등) null 반환 → 호출부가 샘플로 폴백. */
+function sggRealValue(code, name, metricKey, yi){
+  if(!SGG_REAL || !SGG_REAL.data) return null;
+  var byCode = SGG_REAL.data[code];
+  if(!byCode) return null;
+  var rec = byCode[name];
+  if(!rec) return null;
+  var arr = rec[metricKey];                 /* pop:[6] | density:[6]|null */
+  if(!arr || arr[yi] == null) return null;  /* density 가 null 이면 폴백 */
+  return arr[yi];
+}
 
 /* DATA[region][metricKey] = [연도순 값] (YEARS 와 같은 길이).
    시도 = KOSIS 주민등록인구 실데이터(pop=천명, density=인구/면적). 갱신: stats/fetch_population_kosis.py */
@@ -315,13 +337,25 @@ function sggSampleValues(names, sidoVal, metricKey){
   });
   $("pb-src-map").textContent = "출처: " + SOURCE_NOTE;
 
-  /* 드릴된 시도의 시군구 [{name,value}] (샘플). 캐시된 names 가 있어야 호출됨. */
+  /* 드릴된 시도의 시군구 [{name, value, sample}] — 실데이터 우선, 미매칭만 샘플.
+     캐시된 names(=sgg geojson properties.name) 가 있어야 호출됨.
+     sample:true 인 항목은 KOSIS 실데이터에 없어 결정적 샘플을 쓴 것(툴팁에 "(샘플)" 표기). */
   function sggData(){
     var code = SIDO_CODE[state.drillSido];
     var cached = code && sggCache[code];
     if(!cached) return [];
-    var sidoVal = seriesOf(state.drillSido, state.metric)[yearIndex(state.year)];
-    return sggSampleValues(cached.names, sidoVal, state.metric);
+    var yi = yearIndex(state.year);
+    var sidoVal = seriesOf(state.drillSido, state.metric)[yi];
+    /* 샘플 베이스(이름 해시 결정적 배분) — 미매칭 시군구의 폴백값. */
+    var sample = sggSampleValues(cached.names, sidoVal, state.metric);
+    var sampleByName = {};
+    sample.forEach(function(d){ sampleByName[d.name] = d.value; });
+    /* 시군구별로 실데이터가 있으면 실값, 없으면 샘플값(실/샘플 혼재). */
+    return cached.names.map(function(name){
+      var real = sggRealValue(code, name, state.metric, yi);
+      if(real != null) return { name:name, value:real, sample:false };
+      return { name:name, value:sampleByName[name], sample:true };
+    });
   }
 
   /* ── 지도(choropleth) 또는 폴백 막대 ── */
@@ -334,8 +368,12 @@ function sggSampleValues(names, sidoVal, metricKey){
       var smax = sd.reduce(function(mx,d){ return Math.max(mx, d.value); }, 0) || 1;
       mapChart.setOption({
         tooltip:{ trigger:"item", formatter:function(p){
+          var isSample = p.data && p.data.sample;  /* 데이터 항목에 실어둔 실/샘플 플래그 */
           return state.drillSido + " " + p.name + "<br/>" + m.label + ": "
-            + (p.value == null ? "-" : p.value) + " " + m.unit + "<br/><i>※ 시군구 수치는 샘플(데모)</i>"; } },
+            + (p.value == null ? "-" : p.value) + " " + m.unit
+            + (isSample ? " <i>(샘플)</i>" : "")
+            + "<br/><i>" + (isSample ? "※ 이 시군구는 미매칭 — 샘플(데모)값"
+                                     : "KOSIS 시군구 실데이터(2020~2025)") + "</i>"; } },
         visualMap:{ min:0, max:smax, left:"left", bottom:"4%",
           text:["많음","적음"], calculable:true, inRange:{ color:["#eaf1f8","#2a5180","#15314f"] } },
         series:[{ type:"map", map:"sgg_" + code, roam:false, data:sd,
@@ -394,19 +432,22 @@ function sggSampleValues(names, sidoVal, metricKey){
     var m = metricOf(state.metric);
     var d;
     if(state.level === "sido" && state.drillSido){
-      $("pb-rank-sub").textContent = state.drillSido + " · " + state.year + "년 시군구별 " + m.label + " (샘플 · 상위 순)";
+      $("pb-rank-sub").textContent = state.drillSido + " · " + state.year + "년 시군구별 " + m.label + " (KOSIS 실데이터 · 미매칭은 샘플 · 상위 순)";
       d = sggData().slice().sort(function(a, b){ return a.value - b.value; }); /* 오름차순(가로막대 아래→위) */
     } else {
       $("pb-rank-sub").textContent = state.year + "년 지역별 " + m.label + " (상위 순)";
       d = rankedByRegion(state.year, state.metric);
     }
     var hi = (state.level === "sido") ? null : state.region;
+    var isDrill = (state.level === "sido");
     rankChart.setOption({
       tooltip:{ trigger:"axis", axisPointer:{ type:"shadow" },
         valueFormatter:function(v){ return v + " " + m.unit; } },
       grid:{ left:120, right:24, top:10, bottom:24 },
       xAxis:{ type:"value" },
-      yAxis:{ type:"category", data:d.map(function(x){ return x.name; }), axisLabel:{ fontSize:11 } },
+      /* 드릴 뷰에서 샘플 시군구는 라벨에 "(샘플)" 표기(실/샘플 혼재 가시화). */
+      yAxis:{ type:"category", axisLabel:{ fontSize:11 },
+        data:d.map(function(x){ return (isDrill && x.sample) ? x.name + " (샘플)" : x.name; }) },
       series:[{ type:"bar", data:d.map(function(x){
         return { value:x.value,
           itemStyle:{ color: (hi && x.name === hi) ? "#c2741a" : "#2a5180" } }; }) }]
@@ -430,8 +471,20 @@ function sggSampleValues(names, sidoVal, metricKey){
     }
   }
 
+  /* 시군구 KOSIS 실데이터를 첫 드릴 때 '한 번만' fetch → SGG_REAL 캐시.
+     성공/실패와 무관하게 cb() 를 호출(실패 시 SGG_REAL=null → 전부 샘플 폴백, graceful). */
+  function loadSggReal(cb){
+    if(SGG_REAL_TRIED){ cb(); return; }   /* 이미 시도함(성공이든 실패든) → 재fetch 금지 */
+    SGG_REAL_TRIED = true;
+    fetch(SGG_REAL_URL)
+      .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function(j){ SGG_REAL = j; cb(); })
+      .catch(function(){ SGG_REAL = null; cb(); }); /* 실패해도 진행(샘플로 동작) */
+  }
+
   /* 시도별 시군구 GeoJSON 을 '그때' fetch(lazy) → registerMap → 드릴 뷰 진입.
-     이미 받은/등록된 시도는 재fetch·재등록하지 않는다. */
+     이미 받은/등록된 시도는 재fetch·재등록하지 않는다.
+     함께 시군구 실데이터(SGG_REAL)도 첫 드릴 때 한 번 로드(실패해도 샘플로 진행). */
   function drillInto(sido){
     var code = SIDO_CODE[sido];
     if(!code) return; /* 매핑 없는 이름이면 드릴 불가(전국 cross-filter 로 폴백) */
@@ -440,18 +493,21 @@ function sggSampleValues(names, sidoVal, metricKey){
       if(!sggReg[code]){ echarts.registerMap("sgg_" + code, sggCache[code].geo); sggReg[code] = true; }
       syncFilterUI(); renderAll();
     }
-    if(sggCache[code]){ enter(); return; }                /* 캐시 hit → 재fetch 금지 */
-    fetch(SGG_GEOJSON_BASE + code + ".geojson")
-      .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function(geo){
-        sggCache[code] = { geo:geo, names:(geo.features || []).map(function(f){ return f.properties.name; }) };
-        enter();
-      })
-      .catch(function(){ /* 시군구 파일 로드 실패 → 전국 뷰의 cross-filter 로 폴백 */
-        state.level = "nation"; state.drillSido = null;
-        state.region = (state.region === sido) ? null : sido;
-        syncFilterUI(); renderAll();
-      });
+    /* 실데이터를 먼저 보장(한 번만 fetch)한 뒤 GeoJSON 처리 → 첫 드릴부터 실값 반영. */
+    loadSggReal(function(){
+      if(sggCache[code]){ enter(); return; }                /* 캐시 hit → 재fetch 금지 */
+      fetch(SGG_GEOJSON_BASE + code + ".geojson")
+        .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function(geo){
+          sggCache[code] = { geo:geo, names:(geo.features || []).map(function(f){ return f.properties.name; }) };
+          enter();
+        })
+        .catch(function(){ /* 시군구 파일 로드 실패 → 전국 뷰의 cross-filter 로 폴백 */
+          state.level = "nation"; state.drillSido = null;
+          state.region = (state.region === sido) ? null : sido;
+          syncFilterUI(); renderAll();
+        });
+    });
   }
 
   /* 전국으로 복귀 */
