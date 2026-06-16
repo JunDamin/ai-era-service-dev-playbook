@@ -23,6 +23,14 @@ python fetch_population_kosis.py --key <KOSIS키> --years 6 --out population_kos
 - 시군구/연령까지: `--level all`(시군구 포함) 또는 다른 tblId(예 DT_1B04005N=5세별). 표마다 objL2(연령)·itmId가 다르니 KOSIS 'OpenAPI URL 생성기'로 확인.
 - **고령비율**: 5세별 표(objL2 까다로움) 대신 **이미 계산된 비율표 `DT_1YL20631`(고령인구비율 시도/시군구)** 사용 — itmId에 65세이상(A)·전체(B)·비율(A÷B×100). 비율 항목은 `UNIT_NM`에 `%`. 표 찾기는 **`statisticsSearch.do?searchNm=고령인구비율`**(통합검색)이 빠름. (대시보드 시도·시군구 elderly 가 이걸로 채워짐.)
 
+### KOSIS 파라미터 규칙 (공식 매뉴얼 openApi_manual_v1.0)
+- **다분류 표**: 분류 차원마다 `objL1`~`objL8`(필수는 objL1), `itmId` 필수. 5세별·성별 표는 연령/성별이 별도 objLn이라 그 코드를 줘야 함(안 주면 err20/21).
+- **키워드**: `all`(항목/분류 전체) · **`<코드>*` = 그 코드의 *하위레벨 전체*** (예 `objL1=11*` = 서울 하위 시군구 전부) · `+`(여러 값, 예 `11+21`).
+- **기간**: `prdSe`(Y/M/…) + (`startPrdDe`&`endPrdDe` *또는* `newEstPrdCnt`) [+ `prdInterval`].
+- **제한**: 요청당 **4만 셀** 이하.
+- 엔드포인트: 파라미터 방식 = `Param/statisticsParameterData.do`. (`statisticsData.do`의 '자료등록 방식'은 `userStatsId` 필요 → 우리는 Param 사용.)
+- 표 찾기: `statisticsList.do`(목록·vwCd/parentListId) · `statisticsSearch.do`(통합검색·searchNm). 매뉴얼: https://kosis.kr/openapi/file/openApi_manual_v1.0.pdf
+
 ## 밀도(분모) = 인구 / 면적
 - 면적은 `../geo` 의 GeoJSON에서 계산(키 불필요):
   `npx -y mapshaper ../geo/skorea-provinces.geojson -proj EPSG:5179 -each 'area_km2=this.area/1e6' -o area_sido.json` (EPSG:5179=한국 미터좌표 → ㎢).
