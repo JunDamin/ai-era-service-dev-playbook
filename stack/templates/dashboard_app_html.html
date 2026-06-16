@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<!--
+  ════════════════════════════════════════════════════════════════════════
+  조망/현황 대시보드 — 정적 HTML 단일파일판 (ECharts 5 · vanilla JS)
+  ════════════════════════════════════════════════════════════════════════
+  무엇:   인구분포·연도별 추이·지역 밀도를 지도/추이/순위 3뷰로 보여주는
+          '문제정의의 근거 도구'. "이게 왜 문제인가(규모·지역성)"를
+          주장이 아니라 숫자로 증명한다.
+  ★ 용도 경계:  이건 현황 근거/조망 도구다 — 국민 서비스의 '정문(행동 흐름)'이 아니다.
+          본선 ①단계(문제정의)와 공무원 관리자뷰에서 끌어쓴다.
+          국민용 행동 흐름이 필요하면 decision/checklist/document 템플릿을 써라.
+  언제 고르나:
+    - "규모가 크다 / 특정 지역에 몰려있다 / 해마다 늘고 있다"를 숫자로 보여야 할 때.
+    - 정적 배포(반입·망분리·오프라인 데모)인데 인터랙티브 차트가 필요할 때.
+    - 관리자가 연도·지표·지역을 바꿔가며 현황을 훑어야 할 때.
+  기본값 메커니즘 (도메인을 바꿔도 유지하라):
+    ⓐ 3뷰 cross-filter — 지도 클릭 → 추이·순위가 그 지역으로 좁혀짐.
+       연도/지표 변경 → 3뷰 전체 갱신. (한 가지 조작이 전체 맥락을 바꾼다)
+    ⓑ 정량은 길이·2D 위치로(막대·선) — 면적·각도(파이) 금지(lessons/dashboard §3).
+    ⓒ 모든 값은 '샘플/예시'로 명시 + 출처 자리표시 — 지어낸 값임을 숨기지 않는다.
+  교체 지점:  아래 SAMPLE_DATA / METRICS / YEARS 와 GeoJSON URL만 도메인에 맞게.
+  데이터:  실시간 API 금지 — KOSIS/SGIS에서 '당일 받아 고정 데이터화'.
+          교체 방법은 파일 하단 '실제 데이터로 스왑하는 법' 주석 블록 참조.
+  ════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>현황 대시보드 · 인구·추이·지역밀도 (조망 템플릿)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+/* design/tokens.css 인라인(.pb- 프리픽스 — 프레임워크 충돌 방지) */
+:root{
+  --pb-navy:#15314f; --pb-navy2:#2a5180; --pb-ink:#1b2330; --pb-muted:#5d6877;
+  --pb-line:#d9e1ea; --pb-tint:#f4f7fb; --pb-bg:#ffffff; --pb-accent:#c2741a;
+  --pb-ok:#1d8a3c; --pb-warn:#d99413; --pb-bad:#cc2f2f;
+  --pb-s2:8px; --pb-s3:12px; --pb-s4:16px; --pb-s5:24px; --pb-s6:32px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--pb-tint);color:var(--pb-ink);line-height:1.6;letter-spacing:-0.01em;
+  font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+.pb-wrap{max-width:1040px;margin:0 auto;padding:40px 20px 64px}
+.pb-hero{margin-bottom:var(--pb-s5)}
+.pb-hero .pb-badge{display:inline-block;background:var(--pb-navy);color:#fff;font-size:12px;
+  font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:var(--pb-s3)}
+.pb-hero h1{font-size:28px;font-weight:800;line-height:1.3;margin:0 0 var(--pb-s2);color:var(--pb-navy)}
+.pb-hero p{color:var(--pb-muted);margin:0;font-size:15px}
+.pb-usewarn{display:inline-block;background:#fdf3e0;color:#7a5408;font-size:12.5px;font-weight:700;
+  border-radius:8px;padding:7px 12px;margin-top:var(--pb-s3)}
+.pb-card{background:var(--pb-bg);border:1px solid var(--pb-line);border-radius:14px;
+  padding:22px;margin-bottom:20px;box-shadow:0 1px 2px rgba(21,49,79,.04)}
+.pb-card h2{font-size:16px;font-weight:800;color:var(--pb-navy);margin-bottom:4px}
+.pb-card .pb-sub{font-size:12.5px;color:var(--pb-muted);margin-bottom:var(--pb-s3)}
+/* 컨트롤 바 */
+.pb-controls{display:flex;flex-wrap:wrap;gap:var(--pb-s4);align-items:flex-end}
+.pb-controls>div{flex:1;min-width:160px}
+label.pb-l{display:block;font-size:13px;font-weight:700;margin:0 0 6px;color:var(--pb-ink)}
+select.pb-i,input.pb-i{width:100%;border:1px solid var(--pb-line);border-radius:10px;
+  padding:10px 12px;font-size:14px;background:var(--pb-bg);font-family:inherit;color:var(--pb-ink)}
+select.pb-i:focus,input.pb-i:focus{outline:2px solid var(--pb-navy2);border-color:var(--pb-navy2)}
+.pb-yearval{font-weight:800;color:var(--pb-navy2);font-size:14px;margin-left:6px}
+.pb-btn2{background:var(--pb-bg);color:var(--pb-navy);font-weight:700;border:1px solid var(--pb-line);
+  border-radius:10px;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:13.5px}
+.pb-btn2:hover{background:var(--pb-tint)}
+.pb-btn2:disabled{opacity:.45;cursor:default}
+/* 선택 지역 배지 */
+.pb-filterbar{display:flex;align-items:center;gap:10px;margin-top:var(--pb-s3);font-size:13px}
+.pb-filterbar .pb-chip{background:var(--pb-navy);color:#fff;font-weight:700;border-radius:999px;
+  padding:5px 12px;font-size:12.5px}
+.pb-filterbar .pb-chip.none{background:var(--pb-tint);color:var(--pb-muted)}
+/* 차트 영역 */
+.pb-chart{width:100%}
+#pb-map{height:480px}
+#pb-trend,#pb-rank{height:340px}
+.pb-grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pb-srclabel{font-size:11.5px;color:var(--pb-muted);margin-top:10px}
+.pb-fallback{background:#fdf3e0;color:#7a5408;border-radius:10px;padding:10px 14px;font-size:12.5px;
+  margin-bottom:var(--pb-s3);display:none}
+footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;line-height:1.7}
+@media(max-width:760px){.pb-grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="pb-wrap">
+
+  <header class="pb-hero">
+    <span class="pb-badge">조망 템플릿 · 현황 대시보드</span>
+    <h1>이게 왜 문제인가 — 규모·지역성·추이를<br/>주장이 아니라 숫자로.</h1>
+    <p>연도·지표를 바꾸고 지도에서 지역을 누르면 추이·순위가 그 지역으로 좁혀집니다. 문제정의 ①단계와 관리자뷰의 근거 도구.</p>
+    <div class="pb-usewarn">이건 <b>문제정의/현황 근거 도구</b>입니다 — 국민 서비스 정문(행동 흐름)이 아닙니다.</div>
+  </header>
+
+  <!-- 컨트롤 바 -->
+  <section class="pb-card">
+    <div class="pb-controls">
+      <div>
+        <label class="pb-l" for="pb-year">연도<span class="pb-yearval" id="pb-yearval"></span></label>
+        <input class="pb-i" type="range" id="pb-year" />
+      </div>
+      <div>
+        <label class="pb-l" for="pb-metric">지표</label>
+        <select class="pb-i" id="pb-metric"></select>
+      </div>
+      <div style="flex:0 0 auto;min-width:0">
+        <label class="pb-l">&nbsp;</label>
+        <button class="pb-btn2" id="pb-reset" disabled>지역 선택 해제</button>
+      </div>
+    </div>
+    <div class="pb-filterbar">
+      <span>선택 지역</span><span class="pb-chip none" id="pb-chip">전체</span>
+      <span style="color:var(--pb-muted)">지도에서 지역을 누르면 아래 두 차트가 좁혀집니다.</span>
+    </div>
+  </section>
+
+  <!-- ① 지역 분포 지도(choropleth) -->
+  <section class="pb-card">
+    <h2>① 지역 분포 — 어디에 몰려있나</h2>
+    <div class="pb-sub">선택 연도·지표의 17개 시도 분포. 색이 진할수록 큰 값. 지역을 클릭해 필터.</div>
+    <div class="pb-fallback" id="pb-mapfallback">지도(GeoJSON) 로드 실패 — 막대그래프로 대체 표시합니다. (오프라인이면 GeoJSON 임베드 주석 참조)</div>
+    <div class="pb-chart" id="pb-map"></div>
+    <div class="pb-srclabel" id="pb-src-map"></div>
+  </section>
+
+  <div class="pb-grid2">
+    <!-- ② 연도별 추이 -->
+    <section class="pb-card">
+      <h2>② 연도별 추이 — 늘고 있나</h2>
+      <div class="pb-sub" id="pb-trend-sub">전체 합계의 연도 추이.</div>
+      <div class="pb-chart" id="pb-trend"></div>
+    </section>
+    <!-- ③ 지표 비교(순위) -->
+    <section class="pb-card">
+      <h2>③ 지역별 순위 — 얼마나 차이 나나</h2>
+      <div class="pb-sub" id="pb-rank-sub">선택 연도의 지역별 값(상위 순).</div>
+      <div class="pb-chart" id="pb-rank"></div>
+    </section>
+  </div>
+
+  <footer>
+    조망 정적 HTML 템플릿 · ECharts 5 — 모든 값은 <b>샘플/예시(지어낸 값)</b>이며 브라우저 밖으로 전송되지 않습니다.<br/>
+    실제 데이터는 KOSIS·SGIS에서 당일 받아 고정 데이터로 교체하세요(실시간 API 금지). 파일 하단 주석 블록 참조.
+  </footer>
+</div>
+
+<script>
+/*CORE-START*/
+/* ════════ 데이터 placeholder (도메인에 맞게 교체) — 실시간 API 금지, 고정 샘플 ════════
+   ⚠️ 아래 값은 전부 '지어낸 샘플/예시'입니다. 실제처럼 그럴듯하게 만들었을 뿐
+      실제 통계가 아닙니다. 교체 방법은 파일 하단 '실제 데이터로 스왑하는 법' 참조. */
+
+/* 17개 시도. name 은 GeoJSON 의 시도명과 정확히 일치해야 매칭됨(매우 중요). */
+var REGIONS = ["서울특별시","부산광역시","대구광역시","인천광역시","광주광역시","대전광역시",
+  "울산광역시","세종특별자치시","경기도","강원특별자치도","충청북도","충청남도",
+  "전라북도","전라남도","경상북도","경상남도","제주특별자치도"];
+
+var YEARS = [2018, 2020, 2022, 2024, 2026]; /* 샘플 5개 연도(격년) */
+
+/* 지표 정의. key=데이터키, unit=툴팁 단위. 2~3개 권장(군더더기 금지). */
+var METRICS = [
+  { key:"pop",     label:"인구수(천명)",   unit:"천명" },
+  { key:"elderly", label:"고령비율(%)",     unit:"%"   },
+  { key:"density", label:"인구밀도(명/㎢)", unit:"명/㎢" }
+];
+
+/* SAMPLE_DATA[region][metricKey] = [연도순 값] (YEARS 와 같은 길이).
+   ⚠️ 지어낸 값 — 추세(수도권 집중·고령화·밀도 격차)만 '그럴듯하게' 흉내냄. */
+var SAMPLE_DATA = {
+  "서울특별시":   { pop:[9760,9670,9510,9380,9280], elderly:[14.4,16.0,17.8,19.5,21.2], density:[16100,15970,15700,15490,15330] },
+  "부산광역시":   { pop:[3440,3390,3320,3270,3210], elderly:[17.5,19.8,22.0,24.1,26.0], density:[4470,4400,4310,4250,4170] },
+  "대구광역시":   { pop:[2460,2420,2370,2360,2340], elderly:[15.6,17.6,19.7,21.6,23.4], density:[2780,2740,2680,2670,2650] },
+  "인천광역시":   { pop:[2950,2940,2950,3000,3020], elderly:[12.4,14.0,15.7,17.4,19.0], density:[2780,2770,2780,2820,2840] },
+  "광주광역시":   { pop:[1490,1470,1450,1430,1420], elderly:[12.9,14.6,16.4,18.1,19.8], density:[2970,2930,2890,2850,2830] },
+  "대전광역시":   { pop:[1500,1480,1460,1440,1430], elderly:[12.6,14.3,16.1,17.9,19.6], density:[2770,2730,2700,2660,2640] },
+  "울산광역시":   { pop:[1160,1140,1120,1110,1100], elderly:[10.8,12.6,14.5,16.4,18.2], density:[1090,1070,1050,1040,1030] },
+  "세종특별자치시":{ pop:[ 310, 350, 380, 390, 400], elderly:[ 9.1, 9.6,10.4,11.3,12.4], density:[ 670, 750, 810, 840, 860] },
+  "경기도":       { pop:[13080,13420,13620,13780,13900], elderly:[11.3,12.9,14.6,16.2,17.9], density:[1290,1320,1340,1360,1370] },
+  "강원특별자치도":{ pop:[1540,1530,1520,1530,1530], elderly:[18.4,20.5,22.6,24.5,26.3], density:[  91,  91,  90,  91,  91] },
+  "충청북도":     { pop:[1600,1600,1590,1600,1610], elderly:[16.2,18.1,20.0,21.8,23.5], density:[ 216, 216, 215, 216, 217] },
+  "충청남도":     { pop:[2120,2120,2120,2130,2150], elderly:[17.1,18.9,20.7,22.4,24.0], density:[ 257, 257, 257, 258, 261] },
+  "전라북도":     { pop:[1830,1800,1770,1750,1740], elderly:[19.0,21.1,23.2,25.1,26.9], density:[ 226, 223, 219, 217, 215] },
+  "전라남도":     { pop:[1880,1850,1820,1800,1790], elderly:[21.7,23.8,25.9,27.8,29.5], density:[ 153, 150, 148, 146, 145] },
+  "경상북도":     { pop:[2670,2640,2600,2580,2560], elderly:[19.4,21.5,23.6,25.5,27.3], density:[ 140, 139, 137, 136, 135] },
+  "경상남도":     { pop:[3370,3340,3300,3280,3260], elderly:[15.7,17.7,19.8,21.7,23.5], density:[ 320, 317, 313, 311, 309] },
+  "제주특별자치도":{ pop:[ 670, 675, 678, 680, 682], elderly:[14.2,15.9,17.7,19.4,21.1], density:[ 362, 365, 367, 368, 369] }
+};
+
+/* GeoJSON: 대한민국 17개 시도 행정경계.
+   기본은 플레이북에 저장된 로컬 단순화본(186KB)을 우선 사용 → 본선 오프라인·반입제약에 안전.
+   실패하면 CDN(southkorea-maps 원본) → 그래도 실패하면 막대그래프 폴백.
+   (행정경계는 거의 안 변해 base data 로 저장해 둠: data-patterns/geo/, 통계청 SGIS 기반 2018)
+   ★ 완전 단일파일로 만들려면: 로컬 GeoJSON 을 var KOREA_GEOJSON = {...}; 로 붙여 넣고
+     loadGeoJson() 가 그 변수를 쓰게(파일 하단 '실제 데이터로 스왑하는 법' 4번). */
+var GEOJSON_URLS = [
+  "../../data-patterns/geo/skorea-provinces.geojson",  /* 저장된 기본 자산(시도 17·단순화 186KB) — 우선 */
+  "https://cdn.jsdelivr.net/gh/southkorea/southkorea-maps@master/kostat/2018/json/skorea-provinces-2018-geo.json"  /* CDN 폴백(원본 고해상도) */
+];
+var GEOJSON_NAME_PROP = "name"; /* GeoJSON feature.properties 의 시도명 키(데이터셋마다 다름: name/NAME_1 등) */
+
+var SOURCE_NOTE = "샘플/예시(지어낸 값) · 출처 자리표시: KOSIS 주민등록인구·SGIS 인구밀도 · 수집일 YYYY-MM-DD";
+
+/* ════════ 순수 함수 (UI/차트와 분리) ════════ */
+
+/* 한 지역·지표의 연도 배열을 안전하게 꺼냄(없으면 0 채움). */
+function seriesOf(region, metricKey){
+  var rec = SAMPLE_DATA[region];
+  if(rec && rec[metricKey]) return rec[metricKey];
+  return YEARS.map(function(){ return 0; });
+}
+
+/* 선택 연도 인덱스. */
+function yearIndex(year){ var i = YEARS.indexOf(year); return i < 0 ? 0 : i; }
+
+/* 지도/순위용: 선택 연도·지표의 [{name, value}] (전 지역). */
+function valuesByRegion(year, metricKey){
+  var yi = yearIndex(year);
+  return REGIONS.map(function(r){ return { name:r, value:seriesOf(r, metricKey)[yi] }; });
+}
+
+/* 순위(내림차순)용 정렬본. */
+function rankedByRegion(year, metricKey){
+  return valuesByRegion(year, metricKey).slice()
+    .sort(function(a, b){ return a.value - b.value; }); /* ECharts 가로 막대는 아래→위라 오름차순 정렬 */
+}
+
+/* 추이용: 지역 선택 시 그 지역, 없으면 전 지역 합계(밀도·비율은 평균). */
+function trendSeries(selectedRegion, metricKey){
+  if(selectedRegion) return seriesOf(selectedRegion, metricKey);
+  var isAvg = (metricKey === "elderly" || metricKey === "density"); /* 비율·밀도는 합계가 무의미 → 평균 */
+  return YEARS.map(function(_, yi){
+    var sum = REGIONS.reduce(function(acc, r){ return acc + seriesOf(r, metricKey)[yi]; }, 0);
+    return isAvg ? Math.round(sum / REGIONS.length) : sum;
+  });
+}
+
+/* color scale 최댓값(선택 연도 기준). */
+function maxValue(year, metricKey){
+  return valuesByRegion(year, metricKey).reduce(function(m, d){ return Math.max(m, d.value); }, 0);
+}
+
+function metricOf(key){ return METRICS.filter(function(m){ return m.key === key; })[0] || METRICS[0]; }
+/*CORE-END*/
+
+/* ════════ UI / 차트 바인딩 (순수 함수만 호출) ════════ */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var state = { year: YEARS[YEARS.length - 1], metric: METRICS[0].key, region: null };
+  var mapHasGeo = false; /* GeoJSON 등록 성공 여부 */
+
+  var mapChart   = echarts.init($("pb-map"));
+  var trendChart = echarts.init($("pb-trend"));
+  var rankChart  = echarts.init($("pb-rank"));
+
+  /* 컨트롤 초기화 */
+  var yr = $("pb-year");
+  yr.min = 0; yr.max = YEARS.length - 1; yr.step = 1; yr.value = YEARS.length - 1;
+  $("pb-yearval").textContent = state.year;
+  METRICS.forEach(function(m){
+    var o = document.createElement("option"); o.value = m.key; o.textContent = m.label;
+    $("pb-metric").appendChild(o);
+  });
+  $("pb-src-map").textContent = "출처: " + SOURCE_NOTE;
+
+  /* ── 지도(choropleth) 또는 폴백 막대 ── */
+  function renderMap(){
+    var m = metricOf(state.metric);
+    if(mapHasGeo){
+      mapChart.setOption({
+        tooltip:{ trigger:"item", formatter:function(p){
+          return p.name + "<br/>" + m.label + ": " + (p.value == null ? "-" : p.value) + " " + m.unit; } },
+        visualMap:{ min:0, max:maxValue(state.year, state.metric) || 1, left:"left", bottom:"4%",
+          text:["많음","적음"], calculable:true, inRange:{ color:["#eaf1f8","#2a5180","#15314f"] } },
+        series:[{ type:"map", map:"korea", roam:false, data:valuesByRegion(state.year, state.metric),
+          label:{ show:false }, emphasis:{ label:{ show:true }, itemStyle:{ areaColor:"#c2741a" } },
+          select:{ itemStyle:{ areaColor:"#c2741a" } },
+          selectedMode: state.region ? "single" : false }]
+      }, true);
+    } else {
+      /* 폴백: 지도 대신 가로 막대(지도 없이도 분포를 본다) */
+      var d = rankedByRegion(state.year, state.metric);
+      mapChart.setOption({
+        grid:{ left:120, right:30, top:10, bottom:20 },
+        tooltip:{ trigger:"axis", axisPointer:{ type:"shadow" } },
+        xAxis:{ type:"value" },
+        yAxis:{ type:"category", data:d.map(function(x){ return x.name; }), axisLabel:{ fontSize:11 } },
+        series:[{ type:"bar", data:d.map(function(x){ return x.value; }), itemStyle:{ color:"#2a5180" } }]
+      }, true);
+    }
+  }
+
+  /* ── 연도별 추이(line) ── */
+  function renderTrend(){
+    var m = metricOf(state.metric);
+    $("pb-trend-sub").textContent = (state.region ? state.region : "전체") +
+      "의 " + m.label + " 추이" + (state.region ? "" : "(밀도·비율은 평균)");
+    trendChart.setOption({
+      tooltip:{ trigger:"axis", valueFormatter:function(v){ return v + " " + m.unit; } },
+      grid:{ left:56, right:24, top:24, bottom:30 },
+      xAxis:{ type:"category", data:YEARS, boundaryGap:false },
+      yAxis:{ type:"value", scale:true },
+      series:[{ type:"line", smooth:true, symbolSize:7, data:trendSeries(state.region, state.metric),
+        lineStyle:{ width:3, color:"#15314f" }, itemStyle:{ color:"#c2741a" },
+        areaStyle:{ color:"rgba(42,81,128,.10)" } }]
+    }, true);
+  }
+
+  /* ── 지역별 순위(가로 막대) ── */
+  function renderRank(){
+    var m = metricOf(state.metric);
+    $("pb-rank-sub").textContent = state.year + "년 지역별 " + m.label + " (상위 순)";
+    var d = rankedByRegion(state.year, state.metric);
+    rankChart.setOption({
+      tooltip:{ trigger:"axis", axisPointer:{ type:"shadow" },
+        valueFormatter:function(v){ return v + " " + m.unit; } },
+      grid:{ left:120, right:24, top:10, bottom:24 },
+      xAxis:{ type:"value" },
+      yAxis:{ type:"category", data:d.map(function(x){ return x.name; }), axisLabel:{ fontSize:11 } },
+      series:[{ type:"bar", data:d.map(function(x){
+        return { value:x.value,
+          itemStyle:{ color: (state.region && x.name === state.region) ? "#c2741a" : "#2a5180" } }; }) }]
+    }, true);
+  }
+
+  function renderAll(){ renderMap(); renderTrend(); renderRank(); }
+
+  /* 선택 지역 칩 + 해제 버튼 갱신 */
+  function syncFilterUI(){
+    var chip = $("pb-chip");
+    if(state.region){ chip.textContent = state.region; chip.className = "pb-chip"; $("pb-reset").disabled = false; }
+    else { chip.textContent = "전체"; chip.className = "pb-chip none"; $("pb-reset").disabled = true; }
+  }
+
+  /* ⓐ cross-filter: 지도 클릭 → 그 지역으로 추이·순위 좁힘(토글) */
+  mapChart.on("click", function(p){
+    if(!p || !p.name) return;
+    state.region = (state.region === p.name) ? null : p.name;
+    syncFilterUI(); renderAll();
+  });
+
+  /* 연도 슬라이더 → 전체 갱신 */
+  yr.addEventListener("input", function(){
+    state.year = YEARS[parseInt(this.value, 10)];
+    $("pb-yearval").textContent = state.year;
+    renderAll();
+  });
+  /* 지표 변경 → 전체 갱신 */
+  $("pb-metric").addEventListener("change", function(){ state.metric = this.value; renderAll(); });
+  /* 선택 해제 */
+  $("pb-reset").addEventListener("click", function(){ state.region = null; syncFilterUI(); renderAll(); });
+
+  window.addEventListener("resize", function(){ mapChart.resize(); trendChart.resize(); rankChart.resize(); });
+
+  /* GeoJSON 비동기 로드 → 성공하면 지도, 실패하면 폴백 막대.
+     (오프라인 임베드 시: fetch 대신 KOREA_GEOJSON 변수를 바로 registerMap 하세요) */
+  function loadGeoJson(){
+    var urls = GEOJSON_URLS.slice(); /* 로컬 우선 → CDN → (전부 실패 시)막대 폴백 */
+    (function tryNext(){
+      if(!urls.length){
+        $("pb-mapfallback").style.display = "block";
+        mapHasGeo = false;
+        renderMap(); /* 폴백 막대 */
+        return;
+      }
+      fetch(urls.shift())
+        .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function(geo){
+          /* GeoJSON 의 시도명 키가 'name' 이 아니면 properties.name 으로 정규화(매칭 보장) */
+          if(GEOJSON_NAME_PROP !== "name" && geo.features){
+            geo.features.forEach(function(f){ f.properties.name = f.properties[GEOJSON_NAME_PROP]; });
+          }
+          echarts.registerMap("korea", geo);
+          mapHasGeo = true;
+          renderMap();
+        })
+        .catch(tryNext);
+    })();
+  }
+
+  syncFilterUI();
+  renderTrend(); renderRank(); /* 지도 로드 전에 먼저 두 차트는 그림 */
+  renderMap();                 /* 초기엔 폴백 막대(아직 geo 없음) → 로드되면 갱신 */
+  loadGeoJson();
+})();
+</script>
+
+<!--
+  ════════════════════════════════════════════════════════════════════════
+  실제 데이터로 스왑하는 법 (KOSIS / SGIS) — 실시간 호출 금지, '당일 받아 고정'
+  ════════════════════════════════════════════════════════════════════════
+  우리 원칙: 실시간 API 의존 금지(CLAUDE.md '데이터 원칙'). 아래는 '당일 한 번 받아'
+  위 SAMPLE_DATA / GEOJSON 변수에 고정 데이터로 박아 넣는 절차다.
+
+  1) KOSIS (국가통계포털 OpenAPI) — 지역별 인구·연령 (지표 ②③의 값)
+     - 가입 후 인증키 발급: https://kosis.kr/openapi/
+     - 받을 것: 시도별 주민등록인구(연도별), 65세 이상 인구(→ 고령비율 계산).
+       예) 통계표 '행정구역(시도)별 주민등록인구' / '연령별 인구' 를 연도 파라미터로 조회.
+     - 받은 JSON 을 시도×연도 표로 정리한 뒤, 위 SAMPLE_DATA 를 같은 모양으로 교체:
+         SAMPLE_DATA["서울특별시"].pop     = [연도순 인구(천명)];
+         SAMPLE_DATA["서울특별시"].elderly = [연도순 (65+인구 / 전체인구 * 100)];
+     - YEARS 배열을 실제 받은 연도로 맞춘다(길이 = 각 값 배열 길이).
+
+  2) SGIS (통계지리정보서비스) — 행정경계 GeoJSON · 인구밀도 (지도 ① 의 경계/색)
+     - 가입 후 서비스키 발급: https://sgis.kostat.go.kr/developer/
+     - 받을 것: ⑴ 시도 경계 GeoJSON, ⑵ 면적(㎢) 또는 인구밀도.
+     - 인구밀도 = 인구 / 면적 으로 계산해 SAMPLE_DATA[*].density 에 연도순으로 채운다.
+
+  3) 지표를 더하거나 뺄 때
+     - METRICS 배열에 { key, label, unit } 추가/삭제 → SAMPLE_DATA 각 지역에 같은 key 채움.
+       (key 누락 지역은 seriesOf() 가 0 으로 안전 처리하나, 누락은 피할 것)
+
+  4) GeoJSON 교체 / 오프라인 임베드 (망분리·반입 데모)
+     - 온라인: GEOJSON_URL 을 SGIS 등에서 받은 시도 GeoJSON URL 로 교체.
+     - 시도명 키가 'name' 이 아니면(예: NAME_1, SIDO_NM) GEOJSON_NAME_PROP 을 그 키로 설정.
+       ★ GeoJSON 의 시도명과 REGIONS / SAMPLE_DATA 의 키 문자열이 '정확히' 같아야 색이 칠해진다.
+     - 오프라인: 받은 GeoJSON 전체를 이 파일에 var KOREA_GEOJSON = {...}; 로 붙이고,
+       loadGeoJson() 의 fetch 대신:
+         echarts.registerMap("korea", KOREA_GEOJSON); mapHasGeo = true; renderMap();
+       로 바꾼다(네트워크 0 → file:// 로도 완전 동작).
+
+  5) 출처 표기
+     - SOURCE_NOTE 를 실제 통계표명·기관·수집일(YYYY-MM-DD)로 교체.
+     - 모든 화면에 출처를 남긴다(추정·가공 시 그 사실도 명시).
+
+  ⚠️ 페이지 로드 때마다 KOSIS/SGIS 를 호출하지 말 것 — '당일 받아 고정'이 원칙이다
+     (망분리·속도·장애격리·재현가능성). 갱신은 데이터 파일 교체로 한다.
+  ════════════════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
