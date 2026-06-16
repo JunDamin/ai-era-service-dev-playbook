@@ -88,7 +88,7 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
   <header class="pb-hero">
     <span class="pb-badge">조망 템플릿 · 현황 대시보드</span>
     <h1>이게 왜 문제인가 — 규모·지역성·추이를<br/>주장이 아니라 숫자로.</h1>
-    <p>연도·지표를 바꾸고 지도에서 지역을 누르면 추이·순위가 그 지역으로 좁혀집니다. 문제정의 ①단계와 관리자뷰의 근거 도구.</p>
+    <p>연도·지표를 바꾸고 지도에서 시도를 누르면 그 시도의 시군구로 드릴다운됩니다(필요한 시도 파일만 그때 호출). 문제정의 ①단계와 관리자뷰의 근거 도구. <b>시군구 단위 수치는 샘플(데모)</b>입니다.</p>
     <div class="pb-usewarn">이건 <b>문제정의/현황 근거 도구</b>입니다 — 국민 서비스 정문(행동 흐름)이 아닙니다.</div>
   </header>
 
@@ -105,12 +105,13 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
       </div>
       <div style="flex:0 0 auto;min-width:0">
         <label class="pb-l">&nbsp;</label>
+        <button class="pb-btn2" id="pb-back" style="display:none">← 전국으로</button>
         <button class="pb-btn2" id="pb-reset" disabled>지역 선택 해제</button>
       </div>
     </div>
     <div class="pb-filterbar">
       <span>선택 지역</span><span class="pb-chip none" id="pb-chip">전체</span>
-      <span style="color:var(--pb-muted)">지도에서 지역을 누르면 아래 두 차트가 좁혀집니다.</span>
+      <span style="color:var(--pb-muted)">시도를 누르면 그 시도의 <b>시군구</b>로 드릴다운합니다 <b>(시군구 수치는 샘플·데모)</b>.</span>
     </div>
   </section>
 
@@ -139,7 +140,8 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
   </div>
 
   <footer>
-    조망 정적 HTML 템플릿 · ECharts 5 — 모든 값은 <b>샘플/예시(지어낸 값)</b>이며 브라우저 밖으로 전송되지 않습니다.<br/>
+    조망 정적 HTML 템플릿 · ECharts 5 — 모든 값은 <b>샘플/예시(지어낸 값)</b>이며 브라우저 밖으로 전송되지 않습니다.
+    특히 <b>시군구 드릴다운 수치는 시도 값을 결정적으로 배분한 샘플(데모)</b>로, 실제 시군구 통계가 아닙니다.<br/>
     실제 데이터는 KOSIS·SGIS에서 당일 받아 고정 데이터로 교체하세요(실시간 API 금지). 파일 하단 주석 블록 참조.
   </footer>
 </div>
@@ -152,7 +154,7 @@ footer{text-align:center;font-size:12px;color:var(--pb-muted);padding-top:8px;li
 
 /* 17개 시도. name 은 GeoJSON 의 시도명과 정확히 일치해야 매칭됨(매우 중요). */
 var REGIONS = ["서울특별시","부산광역시","대구광역시","인천광역시","광주광역시","대전광역시",
-  "울산광역시","세종특별자치시","경기도","강원특별자치도","충청북도","충청남도",
+  "울산광역시","세종특별자치시","경기도","강원도","충청북도","충청남도",
   "전라북도","전라남도","경상북도","경상남도","제주특별자치도"];
 
 var YEARS = [2018, 2020, 2022, 2024, 2026]; /* 샘플 5개 연도(격년) */
@@ -163,6 +165,18 @@ var METRICS = [
   { key:"elderly", label:"고령비율(%)",     unit:"%"   },
   { key:"density", label:"인구밀도(명/㎢)", unit:"명/㎢" }
 ];
+
+/* 시도명 → 행정구역 코드 매핑. (provinces geojson 의 properties.code 와 일치.
+   드릴다운: 클릭한 시도 코드로 sgg/<코드>.geojson 만 그때 lazy fetch — '필요한 부분만 호출'.) */
+var SIDO_CODE = {
+  "서울특별시":"11","부산광역시":"21","대구광역시":"22","인천광역시":"23",
+  "광주광역시":"24","대전광역시":"25","울산광역시":"26","세종특별자치시":"29",
+  "경기도":"31","강원도":"32","충청북도":"33","충청남도":"34",
+  "전라북도":"35","전라남도":"36","경상북도":"37","경상남도":"38","제주특별자치도":"39"
+};
+/* 시도별 시군구 분할 GeoJSON(드릴용) — 클릭 시 그 시도 파일 하나만 fetch.
+   전체 시군구(18MB)는 절대 한꺼번에 로드하지 않는다. properties.name=시군구명. */
+var SGG_GEOJSON_BASE = "../../data-patterns/geo/sgg/"; /* + 코드 + ".geojson" */
 
 /* SAMPLE_DATA[region][metricKey] = [연도순 값] (YEARS 와 같은 길이).
    ⚠️ 지어낸 값 — 추세(수도권 집중·고령화·밀도 격차)만 '그럴듯하게' 흉내냄. */
@@ -176,7 +190,7 @@ var SAMPLE_DATA = {
   "울산광역시":   { pop:[1160,1140,1120,1110,1100], elderly:[10.8,12.6,14.5,16.4,18.2], density:[1090,1070,1050,1040,1030] },
   "세종특별자치시":{ pop:[ 310, 350, 380, 390, 400], elderly:[ 9.1, 9.6,10.4,11.3,12.4], density:[ 670, 750, 810, 840, 860] },
   "경기도":       { pop:[13080,13420,13620,13780,13900], elderly:[11.3,12.9,14.6,16.2,17.9], density:[1290,1320,1340,1360,1370] },
-  "강원특별자치도":{ pop:[1540,1530,1520,1530,1530], elderly:[18.4,20.5,22.6,24.5,26.3], density:[  91,  91,  90,  91,  91] },
+  "강원도":{ pop:[1540,1530,1520,1530,1530], elderly:[18.4,20.5,22.6,24.5,26.3], density:[  91,  91,  90,  91,  91] },
   "충청북도":     { pop:[1600,1600,1590,1600,1610], elderly:[16.2,18.1,20.0,21.8,23.5], density:[ 216, 216, 215, 216, 217] },
   "충청남도":     { pop:[2120,2120,2120,2130,2150], elderly:[17.1,18.9,20.7,22.4,24.0], density:[ 257, 257, 257, 258, 261] },
   "전라북도":     { pop:[1830,1800,1770,1750,1740], elderly:[19.0,21.1,23.2,25.1,26.9], density:[ 226, 223, 219, 217, 215] },
@@ -240,13 +254,53 @@ function maxValue(year, metricKey){
 }
 
 function metricOf(key){ return METRICS.filter(function(m){ return m.key === key; })[0] || METRICS[0]; }
+
+/* ──────── 시군구 드릴다운용 (샘플 — 실제 시군구 통계 아님) ────────
+   시군구 단위 지표가 없으므로, 그 시도의 값을 시군구들에 '결정적(고정)'으로 배분한다.
+   ⚠️ Math.random 금지 — 페이지를 새로고침해도, 연도를 바꿔도 같은 시군구는 같은 비율을 받는다.
+   비율형(고령%)·밀도는 시도 값 주변에서 흔들고, 인구(천명)는 시도 합을 가중 분배한다.
+   실제 시군구 데이터는 KOSIS 행정구역(시군구)별 통계로 교체(파일 하단 주석 참조). */
+
+/* 문자열 → 고정 해시(0~1). 이름이 같으면 항상 같은 값 → 재현 가능. */
+function hash01(str){
+  var h = 2166136261; /* FNV-1a 32bit */
+  for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return (h % 100000) / 100000; /* 0~1 */
+}
+
+/* 시도 값을 시군구 이름들에 결정적으로 배분.
+   names: 시군구명 배열(sgg geojson properties.name).
+   sidoVal: 그 시도·연도·지표 값. metricKey 로 분배 방식 결정.
+   반환: [{name, value}] (sum 또는 분포가 시도 값을 닮도록). */
+function sggSampleValues(names, sidoVal, metricKey){
+  if(!names || !names.length) return [];
+  if(metricKey === "pop"){
+    /* 인구: 시도 합을 이름 해시 가중치로 분배(합 ≈ 시도 값). */
+    var weights = names.map(function(n){ return 0.4 + hash01(n + "·w"); }); /* 0.4~1.4 */
+    var wsum = weights.reduce(function(a,b){ return a + b; }, 0) || 1;
+    return names.map(function(n, i){
+      return { name:n, value: Math.max(1, Math.round(sidoVal * weights[i] / wsum)) };
+    });
+  }
+  /* 고령%·밀도: 시도 값 주변 ±35% 결정적 변형(분배가 아니라 '닮은 분포'). */
+  return names.map(function(n){
+    var f = 0.65 + hash01(n + "·" + metricKey) * 0.70; /* 0.65~1.35 */
+    var v = sidoVal * f;
+    return { name:n, value: (metricKey === "elderly") ? Math.round(v * 10) / 10 : Math.round(v) };
+  });
+}
 /*CORE-END*/
 
 /* ════════ UI / 차트 바인딩 (순수 함수만 호출) ════════ */
 (function(){
   var $ = function(id){ return document.getElementById(id); };
-  var state = { year: YEARS[YEARS.length - 1], metric: METRICS[0].key, region: null };
-  var mapHasGeo = false; /* GeoJSON 등록 성공 여부 */
+  /* level: "nation"(시도 choropleth) | "sido"(드릴된 시도의 시군구 choropleth).
+     drillSido: 드릴된 시도명. region: 전국 뷰의 cross-filter 선택 시도. */
+  var state = { year: YEARS[YEARS.length - 1], metric: METRICS[0].key, region: null,
+                level: "nation", drillSido: null };
+  var mapHasGeo = false;     /* 시도 GeoJSON 등록 성공 여부 */
+  var sggCache = {};         /* code → {geo, names} 캐시(이미 받은 시도는 재fetch 금지) */
+  var sggReg   = {};         /* echarts.registerMap 등록 여부(map 이름 재사용) */
 
   var mapChart   = echarts.init($("pb-map"));
   var trendChart = echarts.init($("pb-trend"));
@@ -262,13 +316,37 @@ function metricOf(key){ return METRICS.filter(function(m){ return m.key === key;
   });
   $("pb-src-map").textContent = "출처: " + SOURCE_NOTE;
 
+  /* 드릴된 시도의 시군구 [{name,value}] (샘플). 캐시된 names 가 있어야 호출됨. */
+  function sggData(){
+    var code = SIDO_CODE[state.drillSido];
+    var cached = code && sggCache[code];
+    if(!cached) return [];
+    var sidoVal = seriesOf(state.drillSido, state.metric)[yearIndex(state.year)];
+    return sggSampleValues(cached.names, sidoVal, state.metric);
+  }
+
   /* ── 지도(choropleth) 또는 폴백 막대 ── */
   function renderMap(){
     var m = metricOf(state.metric);
-    if(mapHasGeo){
+    if(state.level === "sido" && state.drillSido){
+      /* 드릴 뷰: 시군구 choropleth(샘플 값). */
+      var code = SIDO_CODE[state.drillSido];
+      var sd = sggData();
+      var smax = sd.reduce(function(mx,d){ return Math.max(mx, d.value); }, 0) || 1;
       mapChart.setOption({
         tooltip:{ trigger:"item", formatter:function(p){
-          return p.name + "<br/>" + m.label + ": " + (p.value == null ? "-" : p.value) + " " + m.unit; } },
+          return state.drillSido + " " + p.name + "<br/>" + m.label + ": "
+            + (p.value == null ? "-" : p.value) + " " + m.unit + "<br/><i>※ 시군구 수치는 샘플(데모)</i>"; } },
+        visualMap:{ min:0, max:smax, left:"left", bottom:"4%",
+          text:["많음","적음"], calculable:true, inRange:{ color:["#eaf1f8","#2a5180","#15314f"] } },
+        series:[{ type:"map", map:"sgg_" + code, roam:false, data:sd,
+          label:{ show:false }, emphasis:{ label:{ show:true }, itemStyle:{ areaColor:"#c2741a" } } }]
+      }, true);
+    } else if(mapHasGeo){
+      mapChart.setOption({
+        tooltip:{ trigger:"item", formatter:function(p){
+          return p.name + "<br/>" + m.label + ": " + (p.value == null ? "-" : p.value) + " " + m.unit
+            + "<br/><i>클릭 → 시군구 드릴다운</i>"; } },
         visualMap:{ min:0, max:maxValue(state.year, state.metric) || 1, left:"left", bottom:"4%",
           text:["많음","적음"], calculable:true, inRange:{ color:["#eaf1f8","#2a5180","#15314f"] } },
         series:[{ type:"map", map:"korea", roam:false, data:valuesByRegion(state.year, state.metric),
@@ -289,27 +367,41 @@ function metricOf(key){ return METRICS.filter(function(m){ return m.key === key;
     }
   }
 
-  /* ── 연도별 추이(line) ── */
+  /* ── 연도별 추이(line) ──
+     전국 뷰: 선택 시도 또는 전체. 드릴 뷰: 그 시도의 추이(시군구는 연도 시계열이 없음). */
   function renderTrend(){
     var m = metricOf(state.metric);
-    $("pb-trend-sub").textContent = (state.region ? state.region : "전체") +
-      "의 " + m.label + " 추이" + (state.region ? "" : "(밀도·비율은 평균)");
+    var trendRegion = (state.level === "sido") ? state.drillSido : state.region;
+    if(state.level === "sido"){
+      $("pb-trend-sub").textContent = state.drillSido + " 의 " + m.label + " 추이 (시도 단위 · 시군구 합산 전)";
+    } else {
+      $("pb-trend-sub").textContent = (state.region ? state.region : "전체") +
+        "의 " + m.label + " 추이" + (state.region ? "" : "(밀도·비율은 평균)");
+    }
     trendChart.setOption({
       tooltip:{ trigger:"axis", valueFormatter:function(v){ return v + " " + m.unit; } },
       grid:{ left:56, right:24, top:24, bottom:30 },
       xAxis:{ type:"category", data:YEARS, boundaryGap:false },
       yAxis:{ type:"value", scale:true },
-      series:[{ type:"line", smooth:true, symbolSize:7, data:trendSeries(state.region, state.metric),
+      series:[{ type:"line", smooth:true, symbolSize:7, data:trendSeries(trendRegion, state.metric),
         lineStyle:{ width:3, color:"#15314f" }, itemStyle:{ color:"#c2741a" },
         areaStyle:{ color:"rgba(42,81,128,.10)" } }]
     }, true);
   }
 
-  /* ── 지역별 순위(가로 막대) ── */
+  /* ── 지역별 순위(가로 막대) ──
+     전국 뷰: 시도 순위. 드릴 뷰: 그 시도의 시군구 순위(샘플). */
   function renderRank(){
     var m = metricOf(state.metric);
-    $("pb-rank-sub").textContent = state.year + "년 지역별 " + m.label + " (상위 순)";
-    var d = rankedByRegion(state.year, state.metric);
+    var d;
+    if(state.level === "sido" && state.drillSido){
+      $("pb-rank-sub").textContent = state.drillSido + " · " + state.year + "년 시군구별 " + m.label + " (샘플 · 상위 순)";
+      d = sggData().slice().sort(function(a, b){ return a.value - b.value; }); /* 오름차순(가로막대 아래→위) */
+    } else {
+      $("pb-rank-sub").textContent = state.year + "년 지역별 " + m.label + " (상위 순)";
+      d = rankedByRegion(state.year, state.metric);
+    }
+    var hi = (state.level === "sido") ? null : state.region;
     rankChart.setOption({
       tooltip:{ trigger:"axis", axisPointer:{ type:"shadow" },
         valueFormatter:function(v){ return v + " " + m.unit; } },
@@ -318,24 +410,61 @@ function metricOf(key){ return METRICS.filter(function(m){ return m.key === key;
       yAxis:{ type:"category", data:d.map(function(x){ return x.name; }), axisLabel:{ fontSize:11 } },
       series:[{ type:"bar", data:d.map(function(x){
         return { value:x.value,
-          itemStyle:{ color: (state.region && x.name === state.region) ? "#c2741a" : "#2a5180" } }; }) }]
+          itemStyle:{ color: (hi && x.name === hi) ? "#c2741a" : "#2a5180" } }; }) }]
     }, true);
   }
 
   function renderAll(){ renderMap(); renderTrend(); renderRank(); }
 
-  /* 선택 지역 칩 + 해제 버튼 갱신 */
+  /* 선택 지역 칩 + 해제/뒤로 버튼 갱신 */
   function syncFilterUI(){
     var chip = $("pb-chip");
-    if(state.region){ chip.textContent = state.region; chip.className = "pb-chip"; $("pb-reset").disabled = false; }
-    else { chip.textContent = "전체"; chip.className = "pb-chip none"; $("pb-reset").disabled = true; }
+    var back = $("pb-back");
+    if(state.level === "sido"){
+      chip.textContent = state.drillSido + " (시군구 드릴)"; chip.className = "pb-chip";
+      $("pb-reset").disabled = true;        /* 드릴 중엔 전국 cross-filter 해제 무의미 */
+      if(back) back.style.display = "inline-block";
+    } else {
+      if(back) back.style.display = "none";
+      if(state.region){ chip.textContent = state.region; chip.className = "pb-chip"; $("pb-reset").disabled = false; }
+      else { chip.textContent = "전체"; chip.className = "pb-chip none"; $("pb-reset").disabled = true; }
+    }
   }
 
-  /* ⓐ cross-filter: 지도 클릭 → 그 지역으로 추이·순위 좁힘(토글) */
+  /* 시도별 시군구 GeoJSON 을 '그때' fetch(lazy) → registerMap → 드릴 뷰 진입.
+     이미 받은/등록된 시도는 재fetch·재등록하지 않는다. */
+  function drillInto(sido){
+    var code = SIDO_CODE[sido];
+    if(!code) return; /* 매핑 없는 이름이면 드릴 불가(전국 cross-filter 로 폴백) */
+    function enter(){
+      state.level = "sido"; state.drillSido = sido; state.region = null;
+      if(!sggReg[code]){ echarts.registerMap("sgg_" + code, sggCache[code].geo); sggReg[code] = true; }
+      syncFilterUI(); renderAll();
+    }
+    if(sggCache[code]){ enter(); return; }                /* 캐시 hit → 재fetch 금지 */
+    fetch(SGG_GEOJSON_BASE + code + ".geojson")
+      .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function(geo){
+        sggCache[code] = { geo:geo, names:(geo.features || []).map(function(f){ return f.properties.name; }) };
+        enter();
+      })
+      .catch(function(){ /* 시군구 파일 로드 실패 → 전국 뷰의 cross-filter 로 폴백 */
+        state.level = "nation"; state.drillSido = null;
+        state.region = (state.region === sido) ? null : sido;
+        syncFilterUI(); renderAll();
+      });
+  }
+
+  /* 전국으로 복귀 */
+  function backToNation(){
+    state.level = "nation"; state.drillSido = null; state.region = null;
+    syncFilterUI(); renderAll();
+  }
+
+  /* 지도 클릭: 전국 뷰 → 그 시도로 드릴다운(시군구). 드릴 뷰 → 동작 없음(뒤로 버튼으로 복귀). */
   mapChart.on("click", function(p){
     if(!p || !p.name) return;
-    state.region = (state.region === p.name) ? null : p.name;
-    syncFilterUI(); renderAll();
+    if(state.level === "nation"){ drillInto(p.name); }
   });
 
   /* 연도 슬라이더 → 전체 갱신 */
@@ -348,6 +477,8 @@ function metricOf(key){ return METRICS.filter(function(m){ return m.key === key;
   $("pb-metric").addEventListener("change", function(){ state.metric = this.value; renderAll(); });
   /* 선택 해제 */
   $("pb-reset").addEventListener("click", function(){ state.region = null; syncFilterUI(); renderAll(); });
+  /* ← 전국으로 (드릴 뷰에서만 노출) */
+  $("pb-back").addEventListener("click", backToNation);
 
   window.addEventListener("resize", function(){ mapChart.resize(); trendChart.resize(); rankChart.resize(); });
 
@@ -399,6 +530,10 @@ function metricOf(key){ return METRICS.filter(function(m){ return m.key === key;
          SAMPLE_DATA["서울특별시"].pop     = [연도순 인구(천명)];
          SAMPLE_DATA["서울특별시"].elderly = [연도순 (65+인구 / 전체인구 * 100)];
      - YEARS 배열을 실제 받은 연도로 맞춘다(길이 = 각 값 배열 길이).
+     - ★ 시군구 드릴다운: 현재 시군구 값은 sggSampleValues() 가 시도 값을 이름 해시로
+       '결정적 배분'한 샘플(데모)일 뿐 실제 통계가 아니다. 실제로 쓰려면 KOSIS
+       '행정구역(시군구)별' 통계를 받아 { 시군구명: 값 } 표로 만들고, sggData() 가
+       sggSampleValues() 대신 그 표를 읽게 바꾼다(키 = sgg geojson properties.name 과 정확히 일치).
 
   2) SGIS (통계지리정보서비스) — 행정경계 GeoJSON · 인구밀도 (지도 ① 의 경계/색)
      - 가입 후 서비스키 발급: https://sgis.kostat.go.kr/developer/
