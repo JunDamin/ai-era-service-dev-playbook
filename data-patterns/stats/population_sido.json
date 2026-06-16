@@ -1,0 +1,113 @@
+{
+ "_meta": {
+  "title": "시도별 인구(시드)",
+  "source": "Wikidata (wdt:P1082)",
+  "collected": "2026-06-16",
+  "note": "지역마다 ref_date(기준연월)가 다름 — 정합 스냅샷 아님. 정합 최신/시군구/연령은 KOSIS로 갱신(fetch_population_kosis.py). sido_geo는 data-patterns/geo 의 2018 시도명과 매칭용.",
+  "regions": 17
+ },
+ "data": [
+  {
+   "sido": "경기도",
+   "sido_geo": "경기도",
+   "population": 13103188,
+   "ref_date": "2018-01-01"
+  },
+  {
+   "sido": "서울특별시",
+   "sido_geo": "서울특별시",
+   "population": 9668465,
+   "ref_date": "2020-01-01"
+  },
+  {
+   "sido": "부산광역시",
+   "sido_geo": "부산광역시",
+   "population": 3453198,
+   "ref_date": "2018-07-01"
+  },
+  {
+   "sido": "경상남도",
+   "sido_geo": "경상남도",
+   "population": 3350350,
+   "ref_date": "2018-01-01"
+  },
+  {
+   "sido": "인천광역시",
+   "sido_geo": "인천광역시",
+   "population": 3049315,
+   "ref_date": "2025-10-01"
+  },
+  {
+   "sido": "경상북도",
+   "sido_geo": "경상북도",
+   "population": 2546960,
+   "ref_date": "2024-03-31"
+  },
+  {
+   "sido": "대구광역시",
+   "sido_geo": "대구광역시",
+   "population": 2376044,
+   "ref_date": "2023-01-01"
+  },
+  {
+   "sido": "충청남도",
+   "sido_geo": "충청남도",
+   "population": 2181416,
+   "ref_date": "2018-01-01"
+  },
+  {
+   "sido": "전라남도",
+   "sido_geo": "전라남도",
+   "population": 1790352,
+   "ref_date": "2018-01-01"
+  },
+  {
+   "sido": "전북특별자치도",
+   "sido_geo": "전라북도",
+   "population": 1769607,
+   "ref_date": "2022-12-31"
+  },
+  {
+   "sido": "충청북도",
+   "sido_geo": "충청북도",
+   "population": 1595058,
+   "ref_date": "2022-12-31"
+  },
+  {
+   "sido": "강원특별자치도",
+   "sido_geo": "강원도",
+   "population": 1539274,
+   "ref_date": "2024-06-04"
+  },
+  {
+   "sido": "대전광역시",
+   "sido_geo": "대전광역시",
+   "population": 1443106,
+   "ref_date": "2023-01-01"
+  },
+  {
+   "sido": "광주광역시",
+   "sido_geo": "광주광역시",
+   "population": 1409624,
+   "ref_date": "2024-01-01"
+  },
+  {
+   "sido": "울산광역시",
+   "sido_geo": "울산광역시",
+   "population": 1127553,
+   "ref_date": "2024-01-01"
+  },
+  {
+   "sido": "제주특별자치도",
+   "sido_geo": "제주특별자치도",
+   "population": 670837,
+   "ref_date": "2024-01-01"
+  },
+  {
+   "sido": "세종특별자치시",
+   "sido_geo": "세종특별자치시",
+   "population": 391984,
+   "ref_date": "2025-11-01"
+  }
+ ]
+}
