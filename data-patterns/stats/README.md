@@ -8,6 +8,7 @@
 |---|---|---|---|
 | `population_sido.json` | 시도 17 인구 | **Wikidata**(P1082) | **시드** — 키 없이 받음. ⚠️ `ref_date`(기준연월)가 지역마다 다름(정합 스냅샷 아님) |
 | `population_kosis.json` | (예정) 정합 최신·시군구·연령 | KOSIS | `fetch_population_kosis.py`로 키 발급 후 생성 |
+| `area_sido.json` / `area_sgg.json` | 시도17·시군구250 면적(㎢) | GeoJSON 계산 | **밀도 분모**(키 불필요, EPSG:5179) |
 
 - `population_sido.json` 의 `sido_geo` = `../geo` 의 2018 시도명과 매칭용(강원특별자치도→강원도, 전북특별자치도→전라북도).
 
