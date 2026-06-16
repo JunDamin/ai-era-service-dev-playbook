@@ -21,6 +21,7 @@ python fetch_population_kosis.py --key <KOSIS키> --years 6 --out population_kos
 - 키: `kosis.kr/openapi` 무료·자동승인. **키 문자열을 그대로**(base64 디코드 X) 사용.
 - ★ 검증된 파라미터: 엔드포인트 **`Param/statisticsParameterData.do`** (그냥 `statisticsData.do`는 사용자등록 방식이라 err20), orgId=`101`, tblId=**`DT_1B040A3`**(행정구역별 성별 인구수), itmId=**`T20`**(총인구수), `objL1=ALL`, **objL2 없음**, `prdSe=Y`, `newEstPrdCnt=N`.
 - 시군구/연령까지: `--level all`(시군구 포함) 또는 다른 tblId(예 DT_1B04005N=5세별). 표마다 objL2(연령)·itmId가 다르니 KOSIS 'OpenAPI URL 생성기'로 확인.
+- **고령비율**: 5세별 표(objL2 까다로움) 대신 **이미 계산된 비율표 `DT_1YL20631`(고령인구비율 시도/시군구)** 사용 — itmId에 65세이상(A)·전체(B)·비율(A÷B×100). 비율 항목은 `UNIT_NM`에 `%`. 표 찾기는 **`statisticsSearch.do?searchNm=고령인구비율`**(통합검색)이 빠름. (대시보드 시도·시군구 elderly 가 이걸로 채워짐.)
 
 ## 밀도(분모) = 인구 / 면적
 - 면적은 `../geo` 의 GeoJSON에서 계산(키 불필요):
