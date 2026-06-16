@@ -7,6 +7,7 @@
 | 파일 | 내용 | 출처 | 비고 |
 |---|---|---|---|
 | `population_kosis.json` | **시도 17 인구·밀도 (2020~2025)** | **KOSIS** DT_1B040A3 | ✅ **정합 실데이터**(주민등록인구·연도별·밀도 포함). 합계 5,111만(2025). 기본으로 이것 사용 |
+| `population_sgg_kosis.json` | **시군구 인구·밀도 (2020~2025)** | **KOSIS** DT_1B040A3 | 드릴용. 키=`data[geo시도코드][시군구명]`. 면적매칭 217/278(나머지 행정시·일반구 이름차 → density=null) |
 | `population_sido.json` | 시도 17 인구 | Wikidata(P1082) | 백업 시드(키 없이). ⚠️ `ref_date` 지역마다 다름(정합 아님) — KOSIS본 우선 |
 | `area_sido.json` / `area_sgg.json` | 시도17·시군구250 면적(㎢) | GeoJSON 계산 | **밀도 분모**(키 불필요, EPSG:5179) |
 
