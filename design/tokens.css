@@ -5,7 +5,7 @@
 :root{
   --pb-navy:#15314f; --pb-navy2:#2a5180; --pb-ink:#1b2330; --pb-muted:#5d6877;
   --pb-line:#d9e1ea; --pb-tint:#f4f7fb; --pb-bg:#ffffff; --pb-accent:#c2741a;
-  --pb-ok:#1d8a3c; --pb-warn:#d99413; --pb-bad:#cc2f2f;
+  --pb-ok:#1d8a3c; --pb-warn:#d99413; --pb-bad:#cc2f2f; --pb-info:#2a6fb0;
   /* 8pt 그리드 */ --pb-s1:4px; --pb-s2:8px; --pb-s3:12px; --pb-s4:16px; --pb-s5:24px; --pb-s6:32px; --pb-s7:48px;
 }
 body{background:var(--pb-tint);color:var(--pb-ink);
@@ -60,7 +60,8 @@ input.pb-i:focus,textarea.pb-i:focus,select.pb-i:focus{outline:2px solid var(--p
 .pb-gaps .pb-miss .pb-ic{background:var(--pb-warn)}.pb-gaps .pb-okk .pb-ic{background:var(--pb-ok)}
 .pb-gapsum{font-weight:700;color:var(--pb-bad);font-size:14px;margin:4px 0 0}
 
-/* 시그널(위험/상태 색은 의미로만) */
-.pb-sig-ok{color:var(--pb-ok)}.pb-sig-warn{color:var(--pb-warn)}.pb-sig-bad{color:var(--pb-bad)}
+/* 시그널 — 색은 의미로만 + ★색맹: 항상 아이콘·텍스트 병기(색만으로 판단 금지)
+   복지 3구간: ✅확실=ok / 🔍확인필요=info(빨강 금지) / ❌숨김=muted(회색). 안전: 모름=warn(주황). */
+.pb-sig-ok{color:var(--pb-ok)}.pb-sig-warn{color:var(--pb-warn)}.pb-sig-bad{color:var(--pb-bad)}.pb-sig-info{color:var(--pb-info)}
 
 @media(max-width:480px){.pb-row{flex-direction:column;gap:0}.pb-hero h1{font-size:24px}}
